@@ -164,7 +164,7 @@ export default function OptionsMenu(props) {
     
     
     const AnimatedArrow = () => {
-        const fadeAnim = useRef(new Animated.Value(0.3)).current; // Initial value for opacity
+        const fadeAnim = useRef(new Animated.Value(0.3)).current;
     
         useEffect(() => {
             const fadeIn = Animated.timing(
@@ -345,7 +345,6 @@ export default function OptionsMenu(props) {
 
                             </View>
 
-                        {/* Font contrast selector */}
                         <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                             <Text style={{ flexDirection: 'row', alignItems: 'center', color: '#d6d6d4', fontSize: 15, marginBottom: 5,  marginLeft: -7, fontWeight: 'bold' }}>
                                 <MaterialCommunityIcons name="format-color-text" size={20} color="grey" />
@@ -423,7 +422,7 @@ export default function OptionsMenu(props) {
                                     )}
                                     <Text 
                                         style={{ 
-                                            fontSize: emoji === 'No Emoji' ? 17.5 : 25,  // Change the size only for 'No Emoji'
+                                            fontSize: emoji === 'No Emoji' ? 17.5 : 25, 
                                             marginRight: 10, 
                                             marginLeft: emoji === 'No Emoji' ? 5 : 0,
                                             color: emoji === 'No Emoji' ? '#333' : '#d6d6d4',
@@ -437,7 +436,6 @@ export default function OptionsMenu(props) {
                             </TouchableOpacity>                            
                             ))}
                             
-                            {/* Button to open the emoji picker */}
                             <TouchableOpacity 
                                 onPress={openEmojiPicker}
                                 style={{ 
@@ -599,7 +597,7 @@ export default function OptionsMenu(props) {
 
                                     {/* Restore Button */}
                                     <TouchableOpacity 
-                                        onPress={() => setShowRestoreInfo(true)}  // Show the restore info dialog
+                                        onPress={() => setShowRestoreInfo(true)}
                                         style={{ flexDirection: 'row', alignItems: 'center' }}
                                     >
                                         <MaterialCommunityIcons 

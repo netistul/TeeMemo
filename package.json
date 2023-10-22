@@ -19,7 +19,7 @@
     "expo-file-system": "~15.4.4",
     "expo-sharing": "~11.5.0",
     "react": "18.2.0",
-    "react-native": "0.72.5",
+    "react-native": "0.72.6",
     "react-native-paper": "^5.10.6",
     "rn-emoji-picker": "^1.1.6"
   },
