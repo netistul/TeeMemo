@@ -43,6 +43,7 @@ export default function App() {
   const [pressedIndex, setPressedIndex] = useState(null);
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(true);
 
   const saveNote = async () => {
     if (titleRef.current || contentRef.current) {
@@ -446,6 +447,7 @@ export default function App() {
 
 
   const loadNotes = async () => {
+    setIsLoading(true);
     try {
       const savedNotes = await AsyncStorage.getItem('notes');
       if (savedNotes !== null) {
@@ -454,6 +456,7 @@ export default function App() {
     } catch (error) {
       console.log("Error loading notes:", error);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -671,7 +674,9 @@ export default function App() {
                         </View>
                       )}
                       {
-                        notes.length === 0 ? (
+                        isLoading ? (
+                          <View />
+                        ) : notes.length === 0 ? (
                           <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'flex-end' }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                               <Text style={{ marginRight: 20, fontSize: 18, color: '#777' }}>No notes available</Text>
