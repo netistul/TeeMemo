@@ -1,6 +1,5 @@
 {
   "expo": {
-    "entryPoint": "./src/App.js",
     "name": "TeeMemo",
     "slug": "teememo",
     "version": "1.0.0",

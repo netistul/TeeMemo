@@ -3,13 +3,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState, useEffect,useRef } from 'react';
 import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, ScrollView, TouchableOpacity, Keyboard, TouchableNativeFeedback, BackHandler, FlatList, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { registerRootComponent } from 'expo';
+
 
 import OptionsMenu from './OptionsMenu';
 import { undo, redo } from './UndoRedo';
 import { CustomCheckBox, deleteNote, handleBulkDelete, toggleSelectNote, exitBulkDeleteMode, DeleteButtons } from './DeleteNote';
 
-function App() {
+export default function App() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [notes, setNotes] = useState([]);
@@ -86,9 +86,7 @@ function App() {
                 };
                 newNotes.unshift(newNote);
 
-                editingNoteIdRef.current = newNoteId; 
-                console.log("Added new note with ID:", newNoteId);
-                console.log("Created date and time:", newNote.created);
+                editingNoteIdRef.current = newNoteId;
             }
 
             try {
@@ -102,7 +100,6 @@ function App() {
             return newNotes;
         });
 
-        // Removed logs related to undo and redo logic
         setUndoStack([...undoStack, [...notes]]);
     }
 };
@@ -691,5 +688,3 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   }  
 });
-
-export default registerRootComponent(App);
