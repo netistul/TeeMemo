@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import OptionsMenu from './OptionsMenu';
 import { undo, redo } from './UndoRedo';
 import { deleteNote, handleBulkDelete, toggleSelectNote, exitBulkDeleteMode, DeleteButtons } from './DeleteNote';
+import SplashScreen from './SplashScreen';
 
 export default function App() {
   const [title, setTitle] = useState('');
@@ -45,8 +46,9 @@ export default function App() {
   const [pressedIndex, setPressedIndex] = useState(null);
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState(new Set());
-  const [isLoading, setIsLoading] = useState(true);
   const [hasLoadedNotes, setHasLoadedNotes] = useState(false);
+  const [preloadedNotes, setPreloadedNotes] = useState(null);
+  const [isAppReady, setIsAppReady] = useState(false);
 
   const saveNote = async () => {
     if (titleRef.current || contentRef.current) {
@@ -319,24 +321,7 @@ export default function App() {
     hasChangedRef.current = hasChanged;
  }, [hasChanged]);
 
-  useEffect(() => {
-  const loadBackgroundColor = async () => {
-    try {
-      const savedColor = await AsyncStorage.getItem('selectedBackgroundColor');
-      if (savedColor !== null) {
-        setNoteBackgroundColor(savedColor);
-        setStatusBarColor(savedColor);
-      }
-    } catch (error) {
-      console.log("Error loading background color:", error);
-    }
-  };
-
-  loadNotes();
-  loadBackgroundColor();
-  loadFontSize();
-  loadFontContrast();
-}, []);
+ 
 
   useEffect(() => {
     AsyncStorage.setItem('fontSize', String(fontSize));
@@ -348,17 +333,15 @@ export default function App() {
 
 
   const loadNotes = async () => {
-    setIsLoading(true);
     try {
       const savedNotes = await AsyncStorage.getItem('notes');
       if (savedNotes !== null) {
         setNotes(JSON.parse(savedNotes));
       }
-      setHasLoadedNotes(true);
+      
     } catch (error) {
       console.log("Error loading notes:", error);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -420,6 +403,15 @@ export default function App() {
     saveShowUndoRedo();
   }, [showUndoRedo]);
 
+  useEffect(() => {
+    if (preloadedNotes !== null) {
+      setNotes(preloadedNotes);
+    }
+  }, [preloadedNotes]);
+
+  if (!isAppReady) {
+    return <SplashScreen setPreloadedNotes={setPreloadedNotes} setIsAppReady={setIsAppReady} />;
+  }
 
   return (
     <Provider theme={theme}>
@@ -580,6 +572,7 @@ export default function App() {
                         ) : (
                      
                           <FlatList
+                            removeClippedSubviews={true}
                             data={notes}
                             initialNumToRender={10}
                             maxToRenderPerBatch={10}
