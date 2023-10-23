@@ -566,7 +566,19 @@ export default function App() {
                         </View>
                       )}
 
-         
+                    {
+                        hasLoadedNotes && notes.length === 0 ? (
+                          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'flex-end' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                              <Text style={{ marginRight: 20, fontSize: 18, color: '#777' }}>No notes available</Text>
+                              <Image 
+                                source={require('./teememo.png')}
+                                style={{ width: 200, height: 200 }}
+                              />
+                            </View>
+                          </View>
+                        ) : (
+                     
                           <FlatList
                             data={notes}
                             initialNumToRender={10}
@@ -598,7 +610,9 @@ export default function App() {
                                 getColorByIndex={getColorByIndex}
                               />
                             )}
-                          />        
+                          />     
+                      )
+                    }    
                               </>
                           )}
               <Portal>
