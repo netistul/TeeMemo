@@ -10,9 +10,11 @@ import * as DocumentPicker from 'expo-document-picker';
 import EmojiPicker, { emojiFromUtf16 } from "rn-emoji-picker";
 import { emojis as emojiData } from "rn-emoji-picker/dist/data";
 
+import { deleteNote, handleBulkDelete } from './DeleteNote.js';
+
 export default function OptionsMenu(props) {
     // Destructuring the props
-    const { toggleUndoRedo, showUndoRedo, noteBackgroundColor, isDeleteDialogVisible, setDeleteDialogVisible, isOptionsDialogVisible, setOptionsDialogVisible, setSoftBlackBackground, setPureDarkBackground, setEvernoteStyle, visible, setVisible, fontSize, setFontSize, visibleContrast, setVisibleContrast, fontContrast, setFontContrast, emojis, notes, noteToDeleteId, setNotes, deleteNote } = props;
+    const { editingNoteIdRef, setContent, setTitle, setIsAddingNote, toggleUndoRedo, showUndoRedo, noteBackgroundColor, isDeleteDialogVisible, setDeleteDialogVisible, isOptionsDialogVisible, setOptionsDialogVisible, setSoftBlackBackground, setPureDarkBackground, setEvernoteStyle, visible, setVisible, fontSize, setFontSize, visibleContrast, setVisibleContrast, fontContrast, setFontContrast, emojis, notes, noteToDeleteId, setNotes, deleteNote } = props;
     const [showBackupInfo, setShowBackupInfo] = React.useState(false);
     const [showRestoreInfo, setShowRestoreInfo] = React.useState(false);
     const [recentEmojis, setRecentEmojis] = useState([]);
@@ -200,7 +202,6 @@ export default function OptionsMenu(props) {
         );
     }
 
-
     return (
         <>
            {selectedEmoji && (
@@ -236,7 +237,16 @@ export default function OptionsMenu(props) {
             </Dialog.Content>
             <Dialog.Actions>
                 <Button onPress={() => setDeleteDialogVisible(false)}>Cancel</Button>
-                <Button onPress={deleteNote}>Delete</Button>
+                <Button onPress={() => deleteNote(
+                    noteToDeleteId,
+                    setNotes,
+                    setDeleteDialogVisible,
+                    setIsAddingNote,
+                    setTitle,
+                    setContent,
+                    editingNoteIdRef,
+                    notes
+                )}>Delete</Button>
             </Dialog.Actions>
         </Dialog>
         <Dialog visible={isOptionsDialogVisible} onDismiss={() => setOptionsDialogVisible(false)} style={{ backgroundColor: '#333' }}>                                      

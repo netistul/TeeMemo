@@ -5,6 +5,8 @@ import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import OptionsMenu from './OptionsMenu';
+import { undo, redo } from './UndoRedo';
+import { deleteNote, handleBulkDelete, toggleSelectNote, exitBulkDeleteMode, DeleteButtons } from './DeleteNote';
 
 export default function App() {
   const [title, setTitle] = useState('');
@@ -44,6 +46,7 @@ export default function App() {
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedNotes, setHasLoadedNotes] = useState(false);
 
   const saveNote = async () => {
     if (titleRef.current || contentRef.current) {
@@ -124,9 +127,9 @@ export default function App() {
       >
         <View style={[styles.customCard, { backgroundColor: getColorByIndex(index) }]}>
         {isBulkDeleteMode && (
-          <CustomCheckBox isSelected={selectedNotes.has(note.id)}
-          onChange={() => toggleSelectNote(note.id)} />
-
+          <CustomCheckBox 
+          isSelected={selectedNotes.has(note.id)}
+          onChange={() => toggleSelectNote(note.id, setSelectedNotes)} />
         )}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
@@ -161,43 +164,6 @@ export default function App() {
 
   const MemoizedListItem = React.memo(ListItem);
 
-  const undo = () => {
-    const lastState = undoStack.pop();
-
-    if (lastState) {
-      const noteBeingEdited = lastState.find(note => note.id === editingNoteIdRef.current);
-      if (noteBeingEdited) {
-        setTitle(noteBeingEdited.title);
-        setContent(noteBeingEdited.content);
-        setHasChanged(true); 
-        setIsSaved(false);
-      }
-      setRedoStack([...redoStack, [...notes]]);
-      setNotes(lastState);
-        // Trigger auto-save after undo
-      setHasChanged(true);
-      setIsSaved(false); 
-    }
-  };
-
-  const redo = () => {
-    console.log("Redo Stack before pop:", redoStack);
-    const nextState = redoStack.pop();
-    console.log("Popped state:", nextState);
-
-    if (nextState) {
-      const noteBeingEdited = nextState.find(note => note.id === editingNoteIdRef.current);
-      if (noteBeingEdited) {
-        setTitle(noteBeingEdited.title);
-        setContent(noteBeingEdited.content);
-        setHasChanged(true);
-        setIsSaved(false);
-      }
-      setUndoStack([...undoStack, [...notes]]);
-      setNotes(nextState);
-    }
-  };
-
 
   const handleLongPressNote = (noteId) => {
     setIsBulkDeleteMode(true);
@@ -225,71 +191,6 @@ export default function App() {
         </View>
       </TouchableOpacity>
     );
-  };
-  
-  
-  const deleteNote = async () => {
-    setNotes(prevNotes => prevNotes.filter(note => note.id !== noteToDeleteId));
-    setDeleteDialogVisible(false);
-
-    try {
-        AsyncStorage.setItem('notes', JSON.stringify(notes.filter(note => note.id !== noteToDeleteId)));
-    } catch (error) {
-        console.log("Error deleting note:", error);
-    }
-
-    setIsAddingNote(false);
-    setTitle('');
-    setContent('');
-    editingNoteIdRef.current = null;
-};
-
-  const handleBulkDelete = async () => {
-    const newNotes = notes.filter(note => !selectedNotes.has(note.id));
-    try {
-      await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
-    } catch (error) {
-      console.log("Error in bulk delete:", error);
-    }
-    setNotes(newNotes);
-    setIsBulkDeleteMode(false);
-    setSelectedNotes(new Set());
-  };
-
-  <>
-    <Button 
-      mode="contained"
-      buttonColor="#ed3b5a"
-      onPress={handleBulkDelete}
-    >
-      {`Delete ${selectedNotes.size} selected notes`}
-    </Button>
-
-    <Button 
-      mode="outlined"
-      onPress={exitBulkDeleteMode}
-    >
-      Cancel
-    </Button>
-  </>
-
-  const toggleSelectNote = (noteId) => {
-    setSelectedNotes(prevSelected => {
-      console.log("Previous selected notes: ", Array.from(prevSelected));
-      const newSelected = new Set([...prevSelected]);
-      if (newSelected.has(noteId)) {
-        newSelected.delete(noteId);
-      } else {
-        newSelected.add(noteId);
-      }
-      console.log("Newly selected notes: ", Array.from(newSelected));
-      return newSelected;
-    });
-  };
-
-  const exitBulkDeleteMode = () => {
-    setIsBulkDeleteMode(false);
-    setSelectedNotes(new Set());
   };
 
   const setPureDarkBackground = async () => {
@@ -453,6 +354,7 @@ export default function App() {
       if (savedNotes !== null) {
         setNotes(JSON.parse(savedNotes));
       }
+      setHasLoadedNotes(true);
     } catch (error) {
       console.log("Error loading notes:", error);
     }
@@ -563,7 +465,7 @@ export default function App() {
                         {showUndoRedo && (
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                   {/* Undo Button */}
-                                  <TouchableOpacity onPress={undo}>
+                                  <TouchableOpacity onPress={() => undo(undoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, redoStack, notes, setRedoStack, setNotes)}>
                                     <MaterialCommunityIcons 
                                       name="undo" 
                                       size={30} 
@@ -572,7 +474,7 @@ export default function App() {
                                   </TouchableOpacity>
 
                                   {/* Redo Button */}
-                                  <TouchableOpacity onPress={redo}>
+                                  <TouchableOpacity onPress={() => redo(redoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, undoStack, notes, setUndoStack, setNotes)}>
                                     <MaterialCommunityIcons 
                                       name="redo" 
                                       size={30} 
@@ -634,22 +536,12 @@ export default function App() {
         ) : (
             <>  
                     {isBulkDeleteMode ? (
-                    <>
-                        <Button 
-                            mode="contained"
-                            buttonColor="#ed3b5a"
-                            onPress={handleBulkDelete}
-                        >
-                            {`Delete ${selectedNotes.size} selected notes`}
-                        </Button>
-                        <Button 
-                            mode="outlined"
-                            onPress={exitBulkDeleteMode}
-                        >
-                            Cancel
-                        </Button>
-                    </>
-                ) : (
+                                   <DeleteButtons
+                                   handleBulkDelete={() => handleBulkDelete(selectedNotes, setNotes, setIsBulkDeleteMode, setSelectedNotes, notes)}
+                                   exitBulkDeleteMode={() => exitBulkDeleteMode(setIsBulkDeleteMode, setSelectedNotes)}
+                                   selectedNotes={selectedNotes}
+                               />
+                           ) : (
                 <Button 
                     icon="plus" 
                     mode="contained" 
@@ -673,20 +565,8 @@ export default function App() {
                           <IconButton icon="arrow-down" size={20} color="#777" />
                         </View>
                       )}
-                      {
-                        isLoading ? (
-                          <View />
-                        ) : notes.length === 0 ? (
-                          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'flex-end' }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <Text style={{ marginRight: 20, fontSize: 18, color: '#777' }}>No notes available</Text>
-                              <Image 
-                                source={require('./teememo.png')}
-                                style={{ width: 200, height: 200 }}
-                              />
-                            </View>
-                          </View>
-                        ) : (
+
+         
                           <FlatList
                             data={notes}
                             initialNumToRender={10}
@@ -718,13 +598,11 @@ export default function App() {
                                 getColorByIndex={getColorByIndex}
                               />
                             )}
-                          />     
-                        )
-                      }           
+                          />        
                               </>
                           )}
               <Portal>
-                <OptionsMenu showUndoRedo={showUndoRedo} toggleUndoRedo={() => setShowUndoRedo(!showUndoRedo)} undo={undo} redo={redo} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
+                <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} showUndoRedo={showUndoRedo} toggleUndoRedo={() => setShowUndoRedo(!showUndoRedo)} undo={undo} redo={redo} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
               </Portal>
     </View>
     </Provider>
