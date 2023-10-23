@@ -1,6 +1,7 @@
 // DeleteNote.js
 import React from 'react';
 import { Button } from 'react-native-paper'; 
+import { TouchableOpacity, View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const deleteNote = async (noteToDeleteId, setNotes, setDeleteDialogVisible, setIsAddingNote, setTitle, setContent, editingNoteIdRef, notes) => {

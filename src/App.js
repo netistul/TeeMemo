@@ -3,12 +3,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState, useEffect,useRef } from 'react';
 import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, ScrollView, TouchableOpacity, Keyboard, TouchableNativeFeedback, BackHandler, FlatList, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { registerRootComponent } from 'expo';
 
 import OptionsMenu from './OptionsMenu';
 import { undo, redo } from './UndoRedo';
-import { deleteNote, handleBulkDelete, toggleSelectNote, exitBulkDeleteMode, DeleteButtons } from './DeleteNote';
+import { CustomCheckBox, deleteNote, handleBulkDelete, toggleSelectNote, exitBulkDeleteMode, DeleteButtons } from './DeleteNote';
 
-export default function App() {
+function App() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [notes, setNotes] = useState([]);
@@ -167,29 +168,6 @@ export default function App() {
   const handleLongPressNote = (noteId) => {
     setIsBulkDeleteMode(true);
     setSelectedNotes(new Set([...selectedNotes, noteId]));
-  };
-
-  const CustomCheckBox = ({ isSelected, onChange }) => {
-    console.log("Is selected:", isSelected);
-    return (
-      <TouchableOpacity onPress={onChange} style={{ padding: 10 }}>
-        <View
-          style={[
-            {
-              width: 20,
-              height: 20,
-              borderWidth: 2,
-              borderColor: "#000",
-              justifyContent: 'center',
-              alignItems: 'center',
-            },
-            isSelected ? { backgroundColor: "#000" } : {},
-          ]}
-        >
-          {isSelected ? <Text style={{ color: "#FFF", fontSize: 18 }}>X</Text> : null}
-        </View>
-      </TouchableOpacity>
-    );
   };
 
   const setPureDarkBackground = async () => {
@@ -713,3 +691,5 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   }  
 });
+
+export default registerRootComponent(App);

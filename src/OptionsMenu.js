@@ -10,8 +10,6 @@ import * as DocumentPicker from 'expo-document-picker';
 import EmojiPicker, { emojiFromUtf16 } from "rn-emoji-picker";
 import { emojis as emojiData } from "rn-emoji-picker/dist/data";
 
-import { deleteNote, handleBulkDelete } from './DeleteNote.js';
-
 export default function OptionsMenu(props) {
     // Destructuring the props
     const { editingNoteIdRef, setContent, setTitle, setIsAddingNote, toggleUndoRedo, showUndoRedo, noteBackgroundColor, isDeleteDialogVisible, setDeleteDialogVisible, isOptionsDialogVisible, setOptionsDialogVisible, setSoftBlackBackground, setPureDarkBackground, setEvernoteStyle, visible, setVisible, fontSize, setFontSize, visibleContrast, setVisibleContrast, fontContrast, setFontContrast, emojis, notes, noteToDeleteId, setNotes, deleteNote } = props;
