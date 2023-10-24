@@ -8,5 +8,5 @@ The goal was to create a notes app for taking notes as fast and simple as possib
 - Undo and redo options
 - Change color theme for notes
 - Personalize each note with a custom emoji 🦉
-- Option to backup notes directly on cloud (e.g., on Google Drive), restore them whenever you want
+- Backup & Restore notes directly in cloud (e.g., on Google Drive)
 <img src="https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png" width="270">
