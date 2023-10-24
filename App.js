@@ -477,7 +477,7 @@ export default function App() {
                         {showUndoRedo && (
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                   {/* Undo Button */}
-                                  <TouchableOpacity onPress={() => undo(undoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, redoStack, notes, setRedoStack, setNotes)}>
+                                  <TouchableOpacity onPress={() => undo(undoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, redoStack, notes, setRedoStack, setNotes, contentInputRef)}>
                                     <MaterialCommunityIcons 
                                       name="undo" 
                                       size={30} 
@@ -486,7 +486,7 @@ export default function App() {
                                   </TouchableOpacity>
 
                                   {/* Redo Button */}
-                                  <TouchableOpacity onPress={() => redo(redoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, undoStack, notes, setUndoStack, setNotes)}>
+                                  <TouchableOpacity onPress={() => redo(redoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, undoStack, notes, setUndoStack, setNotes, contentInputRef)}>
                                     <MaterialCommunityIcons 
                                       name="redo" 
                                       size={30} 
