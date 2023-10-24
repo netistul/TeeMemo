@@ -540,6 +540,7 @@ export default function App() {
                           backgroundColor: noteBackgroundColor || '#262626',
                           color: fontContrast.color,
                           placeholderColor: '#757578',
+                          caretColor: '#9d9fd2',
                         }}
                         onChange={handleContentChange}
                         onFocus={() => {
