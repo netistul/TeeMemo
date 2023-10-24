@@ -6,6 +6,7 @@ The goal was to create a notes app for taking notes as fast and simple as possib
 - Change font contrast
 - Adjustable font sizes
 - Undo and redo options
+- Delete notes in bulk
 - Change color theme for notes
 - Personalize each note with a custom emoji 🦉
 - Backup & Restore notes directly in cloud (e.g., on Google Drive)
