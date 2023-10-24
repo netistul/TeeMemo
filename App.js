@@ -48,6 +48,7 @@ export default function App() {
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [hasLoadedNotes, setHasLoadedNotes] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(false);
 
   const saveNote = async () => {
     // First, get the HTML content from the RichEditor
@@ -115,23 +116,33 @@ export default function App() {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-        alert('Sorry, we need gallery permissions to make this work!');
-        return;
+      alert('Sorry, we need gallery permissions to make this work!');
+      return;
     }
-
+  
     let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-        base64: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
     });
-
+  
     if (!result.canceled && result.assets && result.assets[0].base64) {
-        let base64URI = `data:image/jpg;base64,${result.assets[0].base64}`;
-        contentInputRef.current?.insertImage(base64URI);
+      let base64URI = `data:image/jpg;base64,${result.assets[0].base64}`;
+      contentInputRef.current?.insertImage(base64URI);
+  
+      // Toggle the state variable to force re-render
+      setForceUpdate(!forceUpdate);
+  
+      // Add a delay to re-set the content in the RichEditor
+      setTimeout(async () => {
+        const newContent = await contentInputRef.current?.getContentHtml();
+        contentInputRef.current?.setContentHTML(newContent);
+      }, 500);
     }
-};
+  };
+  
   
 
   const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsViewMode, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
@@ -529,7 +540,7 @@ export default function App() {
                       <>
                       <ScrollView style={{ flex: 1, backgroundColor: noteBackgroundColor || '#262626' }}>
                         <RichEditor
-                        key={fontSize}
+                        key={`${fontSize}-{forceUpdate ? 'forceUpdate1' : 'forceUpdate2'}`}
                         ref={contentInputRef} 
                         customCSS={`body { font-size: 28px; }`}
                         style={styles.contentInput}
@@ -545,7 +556,7 @@ export default function App() {
                         onChange={handleContentChange}
                         onFocus={() => {
                           if (content === '<div>Start writing...</div>' || !content) {
-                            contentInputRef.current?.setContentHTML('');  // clear the editor content
+                            contentInputRef.current?.setContentHTML('');
                           }
                         }}
                       />
