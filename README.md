@@ -8,6 +8,6 @@ The goal was to create a notes app for taking notes as fast and simple as possib
 - Undo and redo options
 - Multiple font contrast options
 - Backup notes directly on cloud
-- Restore them whenever you need
-- Change background color inside notes
+- Restore them whenever you want
+- Change background color inside note
 - Loads quickly and looks good overall
