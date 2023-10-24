@@ -555,7 +555,8 @@ export default function App() {
                         iconTint="#f7f7f8"
                         onPressAddImage={pickImage}
                         actions={[
-                            actions.insertImage,
+                            actions.undo,
+                            actions.redo,
                             actions.setBold,
                             actions.setItalic,
                             actions.insertBulletsList,
@@ -563,6 +564,8 @@ export default function App() {
                             actions.insertLink,
                             actions.setStrikethrough,
                             actions.setUnderline,
+                            actions.checkboxList,
+                            actions.insertImage,
                         ]}
                         style={styles.richTextToolbarStyle}
                       />      
