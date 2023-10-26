@@ -1,10 +1,11 @@
 import { Button, Menu, IconButton, DefaultTheme, Portal, Provider} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect,useRef, useCallback } from 'react';
 import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, ScrollView, TouchableOpacity, Keyboard, TouchableNativeFeedback, BackHandler, FlatList, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
 import * as ImagePicker from 'expo-image-picker';
+import ColorPicker from 'react-native-wheel-color-picker';
 
 import OptionsMenu from './OptionsMenu';
 import { undo, redo } from './UndoRedo';
@@ -49,69 +50,80 @@ export default function App() {
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [hasLoadedNotes, setHasLoadedNotes] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('#8a3dad');
+  const [isColorPickerVisible, setColorPickerVisible] = useState(false);
+  const [currentColor, setCurrentColor] = useState("#ffffff");
+  const [isSaving, setIsSaving] = useState(false);
 
   const saveNote = async () => {
-    // First, get the HTML content from the RichEditor
-    let richEditorContent = '';
-    if (contentInputRef.current) {
-      richEditorContent = await contentInputRef.current.getContentHtml();
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      let richEditorContent = '';
+      if (contentInputRef.current) {
+        richEditorContent = await contentInputRef.current.getContentHtml();
+      }
+  
+      if (titleRef.current || richEditorContent) {
+        console.log("Saving note");
+  
+        setNotes(prevNotes => {
+          let newNotes = [...prevNotes];
+  
+          const existingNoteIndex = newNotes.findIndex(note => note.id === editingNoteIdRef.current);
+  
+          const currentDateTime = new Date();
+          const currentDateTimeString = currentDateTime.toISOString();
+  
+          if (existingNoteIndex !== -1) {
+            // We are editing an existing note
+            const updatedNote = { 
+              ...newNotes[existingNoteIndex], 
+              title: titleRef.current, 
+              content: richEditorContent,
+              lastEdited: currentDateTimeString
+            };
+            
+            newNotes.splice(existingNoteIndex, 1);
+            newNotes.unshift(updatedNote);
+  
+          } else {
+            // We are adding a new note
+            const newNoteId = Date.now().toString();
+            const newNote = { 
+              id: newNoteId, 
+              title: titleRef.current, 
+              content: richEditorContent,
+              created: tempCreatedDateRef.current || currentDateTimeString, 
+              lastEdited: currentDateTimeString
+            };
+            newNotes.unshift(newNote);
+  
+            editingNoteIdRef.current = newNoteId;
+          }
+  
+          try {
+            // Your storage logic
+            AsyncStorage.setItem('notes', JSON.stringify(newNotes));
+            setIsSaved(true);
+            setHasChanged(false);
+          } catch (storageError) {
+            console.log("Error saving note:", storageError);
+          }
+  
+          tempCreatedDateRef.current = null;
+          return newNotes;
+        });
+  
+        setUndoStack([...undoStack, [...notes]]);
+      }
+    } catch (error) {
+      console.log("An error occurred while saving:", error);
+    } finally {
+      setIsSaving(false);  // This will always be executed, even if an error occurs
     }
+  };  
   
-    // Now proceed with your existing logic, replacing `contentRef.current` with `richEditorContent`
-    if (titleRef.current || richEditorContent) {
-      console.log("Saving note");
-  
-      setNotes(prevNotes => {
-        let newNotes = [...prevNotes];
-  
-        const existingNoteIndex = newNotes.findIndex(note => note.id === editingNoteIdRef.current);
-  
-        const currentDateTime = new Date();
-        const currentDateTimeString = currentDateTime.toISOString();
-  
-        if (existingNoteIndex !== -1) {
-          // We are editing an existing note
-          const updatedNote = { 
-            ...newNotes[existingNoteIndex], 
-            title: titleRef.current, 
-            content: richEditorContent, // Changed this line
-            lastEdited: currentDateTimeString
-          };
-          
-          newNotes.splice(existingNoteIndex, 1);
-          newNotes.unshift(updatedNote);
-  
-        } else {
-          // We are adding a new note
-          const newNoteId = Date.now().toString();
-          const newNote = { 
-            id: newNoteId, 
-            title: titleRef.current, 
-            content: richEditorContent, // Changed this line
-            created: tempCreatedDateRef.current || currentDateTimeString, 
-            lastEdited: currentDateTimeString
-          };
-          newNotes.unshift(newNote);
-  
-          editingNoteIdRef.current = newNoteId;
-        }
-  
-        try {
-          // Your storage logic
-          AsyncStorage.setItem('notes', JSON.stringify(newNotes));
-          setIsSaved(true);
-          setHasChanged(false);
-        } catch (error) {
-          console.log("Error saving note:", error);
-        }
-  
-        tempCreatedDateRef.current = null;
-        return newNotes;
-      });
-  
-      setUndoStack([...undoStack, [...notes]]);
-    }
-  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -123,10 +135,9 @@ export default function App() {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
       base64: true,
-    });
+    });    
   
     if (!result.canceled && result.assets && result.assets[0].base64) {
       let base64URI = `data:image/jpg;base64,${result.assets[0].base64}`;
@@ -143,6 +154,15 @@ export default function App() {
     }
   };
   
+  const handleForeColor = useCallback(() => {
+    contentInputRef.current?.setForeColor(selectedColor);
+  }, [selectedColor]);
+
+  const handleColorPickerChange = (color) => {
+    console.log('Color picker changed:', color);
+    setSelectedColor(color);
+    contentInputRef.current?.setForeColor(color);
+  };
   
 
   const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsViewMode, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
@@ -287,17 +307,22 @@ export default function App() {
     setSelectedEmoji(getEmojiSizeForTitle(text));
   };  
 
+  let debounceTimer;
   const handleContentChange = async () => {
-    if (contentInputRef.current) {
-      const htmlContent = await contentInputRef.current.getContentHtml();
-      console.log("Content changed");
-      setContent(htmlContent);
-      if (!isViewMode) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      if (contentInputRef.current) {
+        const htmlContent = await contentInputRef.current.getContentHtml();
+        console.log("Content changed");
+        setContent(htmlContent);
+        if (!isViewMode) {
           setHasChanged(true);
+        }
+        setIsSaved(false);
       }
-      setIsSaved(false);
-    }
+    }, 300);
   };
+  
   
 
   const theme = {
@@ -535,8 +560,7 @@ export default function App() {
 
                     </View>
                 </View>
-
-                
+        
                       <>
                       <ScrollView style={{ flex: 1, backgroundColor: noteBackgroundColor || '#262626' }}>
                         <RichEditor
@@ -561,26 +585,37 @@ export default function App() {
                         }}
                       />
                        </ScrollView>
-                      <RichToolbar 
+                       <RichToolbar 
                         editor={contentInputRef}
                         selectedIconTint="#873c1e"
                         iconTint="#f7f7f8"
                         onPressAddImage={pickImage}
                         actions={[
-                            actions.undo,
-                            actions.redo,
-                            actions.setBold,
-                            actions.setItalic,
-                            actions.insertBulletsList,
-                            actions.insertOrderedList,
-                            actions.insertLink,
-                            actions.setStrikethrough,
-                            actions.setUnderline,
-                            actions.checkboxList,
-                            actions.insertImage,
+                          actions.undo,
+                          actions.redo,
+                          actions.setBold,
+                          actions.setItalic,
+                          actions.insertBulletsList,
+                          actions.insertOrderedList,
+                          actions.insertLink,
+                          actions.setStrikethrough,
+                          actions.setUnderline,
+                          actions.checkboxList,
+                          actions.foreColor,
+                          actions.insertImage,
                         ]}
                         style={styles.richTextToolbarStyle}
-                      />      
+                        iconMap={{
+                          [actions.foreColor]: () => (
+                            <TouchableOpacity onPress={() => {
+                              setColorPickerVisible(!isColorPickerVisible);
+                            }}>                          
+                              <MaterialCommunityIcons name="palette" size={24} color="white" />
+                            </TouchableOpacity>
+                          ),
+                        }}
+                      />
+  
                       </>
 
             </>
@@ -664,6 +699,41 @@ export default function App() {
                     }    
                               </>
                           )}
+
+{isColorPickerVisible && (
+  <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 999 }}>
+    <View style={{ flex: 1 }}>
+      <ColorPicker
+        color={currentColor}
+        onColorChange={handleColorPickerChange}
+        thumbSize={40}
+        sliderSize={40}
+        noSnap={true}
+        row={false}
+      />
+      <View style={{ position: 'absolute', bottom: 74, right: 10 }}>
+        <View>
+          <Button 
+            onPress={() => {
+              setColorPickerVisible(false);
+            }}
+            style={{
+              backgroundColor: DefaultTheme.colors.surface // Using Default Theme
+            }}
+            labelStyle={{ color: DefaultTheme.colors.primary }}
+            mode="contained"
+          >
+            Done
+          </Button>
+          <View style={{ flexDirection: 'row', position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+            <Text style={{fontSize: 11, color: 'white', fontWeight: 'bold'}}>Close Picker</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+)}
+
               <Portal>
                 <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} showUndoRedo={showUndoRedo} toggleUndoRedo={() => setShowUndoRedo(!showUndoRedo)} undo={undo} redo={redo} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
               </Portal>
