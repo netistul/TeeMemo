@@ -712,61 +712,28 @@ export default function App() {
                               </>
                           )}
 
-{isColorPickerVisible && (
-  <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 999 }}>
-    <View style={{ flex: 1 }}>
-      <ColorPicker
-        ref={colorPickerRef}
-        color={currentColor}
-        onColorChange={handleColorPickerChange}
-        thumbSize={40}
-        sliderSize={40}
-        noSnap={true}
-        row={false}
-        swatchesLast={false}
-      />
-      <View style={{ position: 'absolute', bottom: 74, right: 10 }}>
-        <View>
-          {/* Existing Close Button */}
-          <Button 
-            onPress={() => {
-              setColorPickerVisible(false);
-            }}
-            style={{
-              backgroundColor: DefaultTheme.colors.surface // Using Default Theme
-            }}
-            labelStyle={{ color: DefaultTheme.colors.primary }}
-            mode="contained"
-          >
-            Close
-          </Button>
-          <View style={{ flexDirection: 'row', position: 'absolute', bottom: 44, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
-            <Text style={{fontSize: 11, color: 'white', fontWeight: 'bold'}}>Close Picker</Text>
-          </View>
-
-          {/* New Reset Color Button */}
-          <Button 
-            onPress={() => {
-              // Reset color to default
-              setCurrentColor(fontContrast.color);
-              
-            }}
-            style={{
-              backgroundColor: DefaultTheme.colors.surface,
-              marginTop: 13
-            }}
-            labelStyle={{ color: DefaultTheme.colors.primary }}
-            mode="contained"
-          >
-            Reset Color
-          </Button>
-
-        </View>
-      </View>
-    </View>
-  </View>
-)}
-
+                {isColorPickerVisible && (
+                  <View style={{position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 999}}>
+                    <View style={{flex: 1}}>
+                      <ColorPicker ref={colorPickerRef} color={currentColor} onColorChange={handleColorPickerChange} thumbSize={40} sliderSize={40} noSnap={true} row={false} swatchesLast={false} />
+                      <View style={{position: 'absolute', bottom: 34, right: 1}}>
+                        <View>
+                          {/* Existing Close Button */}
+                          <TouchableOpacity onPress={() => {setColorPickerVisible(false);}} style={{backgroundColor: DefaultTheme.colors.surface, height: 30, width: 90, justifyContent: 'center', alignItems: 'center', borderRadius: 15, marginLeft: 7}}>
+                            <Text style={{color: DefaultTheme.colors.primary, fontSize: 12}}>Close</Text>
+                          </TouchableOpacity>
+                          <View style={{flexDirection: 'row', position: 'absolute', bottom: 31, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.3)'}}>
+                            <Text style={{fontSize: 11, color: 'white', fontWeight: 'bold'}}>Close Picker</Text>
+                          </View>
+                          {/* New Reset Color Button */}
+                          <TouchableOpacity onPress={() => {setCurrentColor(fontContrast.color);}} style={{backgroundColor: DefaultTheme.colors.surface, height: 30, width: 100, justifyContent: 'center', alignItems: 'center', borderRadius: 15, marginTop: 13}}>
+                            <Text style={{color: DefaultTheme.colors.primary, fontSize: 12}}>Reset Color</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                )}
 
               <Portal>
                 <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} showUndoRedo={showUndoRedo} toggleUndoRedo={() => setShowUndoRedo(!showUndoRedo)} undo={undo} redo={redo} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
