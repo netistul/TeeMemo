@@ -56,6 +56,7 @@ export default function App() {
   const colorPickerRef = useRef(null);
   const [isNearEnd, setIsNearEnd] = useState(false);
   const scrollViewRef = useRef(null);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   const saveNote = async () => {
     if (isSaving) return;
@@ -162,6 +163,19 @@ export default function App() {
     contentInputRef.current?.setForeColor(color);
   };
   
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+  
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsViewMode, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
 
@@ -568,11 +582,11 @@ export default function App() {
                     }
                   }}
                   onScroll={({ nativeEvent }) => {
-                    const padding = 50;  // adjust this value
+                    const padding = 50; 
                     const isNearBottom = nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >= nativeEvent.contentSize.height - padding;
                     setIsNearEnd(isNearBottom);
                   }}
-                  scrollEventThrottle={400}  // adjust this value
+                  scrollEventThrottle={400}
                   style={{ flex: 1, backgroundColor: noteBackgroundColor || '#262626' }}
                 >
                   <RichEditor
@@ -597,6 +611,7 @@ export default function App() {
                     }}
                   />
                 </ScrollView>
+              {isKeyboardVisible && (
                 <RichToolbar 
                   editor={contentInputRef}
                   selectedIconTint="#873c1e"
@@ -627,8 +642,9 @@ export default function App() {
                     ),
                   }}
                 />
+              )}
               </>
-
+              
 
             </>
         ) : (
