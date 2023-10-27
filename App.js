@@ -54,6 +54,9 @@ export default function App() {
   const [isColorPickerVisible, setColorPickerVisible] = useState(false);
   const [currentColor, setCurrentColor] = useState("#ffffff");
   const [isSaving, setIsSaving] = useState(false);
+  const colorPickerRef = useRef(null);
+  const [isNearEnd, setIsNearEnd] = useState(false);
+  const scrollViewRef = useRef(null);
 
   const saveNote = async () => {
     if (isSaving) return;
@@ -153,10 +156,6 @@ export default function App() {
       }, 500);
     }
   };
-  
-  const handleForeColor = useCallback(() => {
-    contentInputRef.current?.setForeColor(selectedColor);
-  }, [selectedColor]);
 
   const handleColorPickerChange = (color) => {
     console.log('Color picker changed:', color);
@@ -561,62 +560,76 @@ export default function App() {
                     </View>
                 </View>
         
-                      <>
-                      <ScrollView style={{ flex: 1, backgroundColor: noteBackgroundColor || '#262626' }}>
-                        <RichEditor
-                        key={`${fontSize}-{forceUpdate ? 'forceUpdate1' : 'forceUpdate2'}`}
-                        ref={contentInputRef} 
-                        customCSS={`body { font-size: 28px; }`}
-                        style={styles.contentInput}
-                        androidHardwareAccelerationDisabled={true}
-                        initialContentHTML={content || '<div>Start writing...</div>'}
-                        editorStyle={{
-                          contentCSSText: `font-size: ${fontSize}px;`,
-                          backgroundColor: noteBackgroundColor || '#262626',
-                          color: fontContrast.color,
-                          placeholderColor: '#757578',
-                          caretColor: '#9d9fd2',
-                        }}
-                        onChange={handleContentChange}
-                        onFocus={() => {
-                          if (content === '<div>Start writing...</div>' || !content) {
-                            contentInputRef.current?.setContentHTML('');
-                          }
-                        }}
-                      />
-                       </ScrollView>
-                       <RichToolbar 
-                        editor={contentInputRef}
-                        selectedIconTint="#873c1e"
-                        iconTint="#f7f7f8"
-                        onPressAddImage={pickImage}
-                        actions={[
-                          actions.undo,
-                          actions.redo,
-                          actions.setBold,
-                          actions.setItalic,
-                          actions.insertBulletsList,
-                          actions.insertOrderedList,
-                          actions.insertLink,
-                          actions.setStrikethrough,
-                          actions.setUnderline,
-                          actions.checkboxList,
-                          actions.foreColor,
-                          actions.insertImage,
-                        ]}
-                        style={styles.richTextToolbarStyle}
-                        iconMap={{
-                          [actions.foreColor]: () => (
-                            <TouchableOpacity onPress={() => {
-                              setColorPickerVisible(!isColorPickerVisible);
-                            }}>                          
-                              <MaterialCommunityIcons name="palette" size={24} color="white" />
-                            </TouchableOpacity>
-                          ),
-                        }}
-                      />
-  
-                      </>
+                <>
+                <ScrollView 
+                  ref={scrollViewRef}
+                  onContentSizeChange={() => {
+                    if (isNearEnd) {
+                      scrollViewRef.current.scrollToEnd({ animated: true });
+                    }
+                  }}
+                  onScroll={({ nativeEvent }) => {
+                    const padding = 50;  // adjust this value
+                    const isNearBottom = nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >= nativeEvent.contentSize.height - padding;
+                    setIsNearEnd(isNearBottom);
+                  }}
+                  scrollEventThrottle={400}  // adjust this value
+                  style={{ flex: 1, backgroundColor: noteBackgroundColor || '#262626' }}
+                >
+                  <RichEditor
+                    key={`${fontSize}-{forceUpdate ? 'forceUpdate1' : 'forceUpdate2'}`}
+                    ref={contentInputRef}
+                    customCSS={`body { font-size: 28px; }`}
+                    style={styles.contentInput}
+                    androidHardwareAccelerationDisabled={true}
+                    initialContentHTML={content || '<div>Start writing...</div>'}
+                    editorStyle={{
+                      contentCSSText: `font-size: ${fontSize}px;`,
+                      backgroundColor: noteBackgroundColor || '#262626',
+                      color: fontContrast.color,
+                      placeholderColor: '#757578',
+                      caretColor: '#9d9fd2',
+                    }}
+                    onChange={handleContentChange}
+                    onFocus={() => {
+                      if (content === '<div>Start writing...</div>' || !content) {
+                        contentInputRef.current?.setContentHTML('');
+                      }
+                    }}
+                  />
+                </ScrollView>
+                <RichToolbar 
+                  editor={contentInputRef}
+                  selectedIconTint="#873c1e"
+                  iconTint="#f7f7f8"
+                  onPressAddImage={pickImage}
+                  actions={[
+                    actions.undo,
+                    actions.redo,
+                    actions.setBold,
+                    actions.setItalic,
+                    actions.insertBulletsList,
+                    actions.insertOrderedList,
+                    actions.insertLink,
+                    actions.setStrikethrough,
+                    actions.setUnderline,
+                    actions.checkboxList,
+                    actions.foreColor,
+                    actions.insertImage,
+                  ]}
+                  style={styles.richTextToolbarStyle}
+                  iconMap={{
+                    [actions.foreColor]: () => (
+                      <TouchableOpacity onPress={() => {
+                        setColorPickerVisible(!isColorPickerVisible);
+                      }}>                          
+                        <MaterialCommunityIcons name="palette" size={24} color="white" />
+                      </TouchableOpacity>
+                    ),
+                  }}
+                />
+              </>
+
 
             </>
         ) : (
@@ -704,15 +717,18 @@ export default function App() {
   <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 999 }}>
     <View style={{ flex: 1 }}>
       <ColorPicker
+        ref={colorPickerRef}  // Don't forget to add this ref
         color={currentColor}
         onColorChange={handleColorPickerChange}
         thumbSize={40}
         sliderSize={40}
         noSnap={true}
         row={false}
+        swatchesLast={false}
       />
       <View style={{ position: 'absolute', bottom: 74, right: 10 }}>
         <View>
+          {/* Existing Close Button */}
           <Button 
             onPress={() => {
               setColorPickerVisible(false);
@@ -723,16 +739,35 @@ export default function App() {
             labelStyle={{ color: DefaultTheme.colors.primary }}
             mode="contained"
           >
-            Done
+            Close
           </Button>
-          <View style={{ flexDirection: 'row', position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+          <View style={{ flexDirection: 'row', position: 'absolute', bottom: 44, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
             <Text style={{fontSize: 11, color: 'white', fontWeight: 'bold'}}>Close Picker</Text>
           </View>
+
+          {/* New Reset Color Button */}
+          <Button 
+            onPress={() => {
+              // Reset color to default
+              setCurrentColor(fontContrast.color);
+              
+            }}
+            style={{
+              backgroundColor: DefaultTheme.colors.surface,
+              marginTop: 13
+            }}
+            labelStyle={{ color: DefaultTheme.colors.primary }}
+            mode="contained"
+          >
+            Reset Color
+          </Button>
+
         </View>
       </View>
     </View>
   </View>
 )}
+
 
               <Portal>
                 <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} showUndoRedo={showUndoRedo} toggleUndoRedo={() => setShowUndoRedo(!showUndoRedo)} undo={undo} redo={redo} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
