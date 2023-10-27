@@ -558,10 +558,12 @@ export default function App() {
                         </TouchableOpacity>
                         {/* opening Options menu for OptionsMenu.js */}
                         <TouchableComponent
-                                  onPress={() => {
-                                      Keyboard.dismiss();
-                                      setNoteToDeleteId(editingNoteIdRef.current);
-                                      setOptionsDialogVisible(true);
+                                  onPress={async () => {
+                                    // Blur the RichEditor here
+                                    contentInputRef.current?.blurContentEditor();
+                                    setNoteToDeleteId(editingNoteIdRef.current);
+                                    setOptionsDialogVisible(true);
+                                    Keyboard.dismiss();
                                   }}
                                   background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
                               >
