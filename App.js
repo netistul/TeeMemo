@@ -50,7 +50,6 @@ export default function App() {
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [hasLoadedNotes, setHasLoadedNotes] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(false);
-  const [selectedColor, setSelectedColor] = useState('#8a3dad');
   const [isColorPickerVisible, setColorPickerVisible] = useState(false);
   const [currentColor, setCurrentColor] = useState("#ffffff");
   const [isSaving, setIsSaving] = useState(false);
