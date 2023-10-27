@@ -159,7 +159,7 @@ export default function App() {
 
   const handleColorPickerChange = (color) => {
     console.log('Color picker changed:', color);
-    setSelectedColor(color);
+    setCurrentColor(color);
     contentInputRef.current?.setForeColor(color);
   };
   
@@ -717,6 +717,7 @@ export default function App() {
   <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 999 }}>
     <View style={{ flex: 1 }}>
       <ColorPicker
+        key={currentColor}
         ref={colorPickerRef}  // Don't forget to add this ref
         color={currentColor}
         onColorChange={handleColorPickerChange}
