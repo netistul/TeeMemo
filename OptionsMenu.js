@@ -12,7 +12,7 @@ import { emojis as emojiData } from "rn-emoji-picker/dist/data";
 
 export default function OptionsMenu(props) {
     // Destructuring the props
-    const { editingNoteIdRef, setContent, setTitle, setIsAddingNote, toggleUndoRedo, showUndoRedo, noteBackgroundColor, isDeleteDialogVisible, setDeleteDialogVisible, isOptionsDialogVisible, setOptionsDialogVisible, setSoftBlackBackground, setPureDarkBackground, setEvernoteStyle, visible, setVisible, fontSize, setFontSize, visibleContrast, setVisibleContrast, fontContrast, setFontContrast, emojis, notes, noteToDeleteId, setNotes, deleteNote } = props;
+    const { editingNoteIdRef, setContent, setTitle, setIsAddingNote, noteBackgroundColor, isDeleteDialogVisible, setDeleteDialogVisible, isOptionsDialogVisible, setOptionsDialogVisible, setSoftBlackBackground, setPureDarkBackground, setEvernoteStyle, visible, setVisible, fontSize, setFontSize, visibleContrast, setVisibleContrast, fontContrast, setFontContrast, emojis, notes, noteToDeleteId, setNotes, deleteNote } = props;
     const [showBackupInfo, setShowBackupInfo] = React.useState(false);
     const [showRestoreInfo, setShowRestoreInfo] = React.useState(false);
     const [recentEmojis, setRecentEmojis] = useState([]);
@@ -250,28 +250,7 @@ export default function OptionsMenu(props) {
         <Dialog visible={isOptionsDialogVisible} onDismiss={() => setOptionsDialogVisible(false)} style={{ backgroundColor: '#333' }}>                                      
         <View style={{ padding: 20 }}>
                                 <Text style={{ fontSize: 15, fontWeight: 'bold', color: 'white' }}>Options</Text>
-                                <TouchableOpacity 
-                                    onPress={toggleUndoRedo}
-                                    style={{ 
-                                        flexDirection: 'row', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center'
-                                    }}
-                                >
-                                    <MaterialCommunityIcons 
-                                        name="undo-variant" 
-                                        size={24} 
-                                        color="#9d9fd2"
-                                    />
-                                    <Text style={{ color: '#9d9fd2', fontSize: 17, marginHorizontal: 8 }}>
-                                        {showUndoRedo ? "Close" : "Open"} Undo/Redo
-                                    </Text>
-                                    <MaterialCommunityIcons 
-                                        name="redo" 
-                                        size={24} 
-                                        color="#9d9fd2"
-                                    />
-                                </TouchableOpacity>
+                                
                             </View>
 
         <Dialog.Content style={{ backgroundColor: '#333' }}>

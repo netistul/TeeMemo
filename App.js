@@ -6,9 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
 import * as ImagePicker from 'expo-image-picker';
 import ColorPicker from 'react-native-wheel-color-picker';
+import { debounce } from 'lodash';
 
 import OptionsMenu from './OptionsMenu';
-import { undo, redo } from './UndoRedo';
 import { CustomCheckBox, deleteNote, handleBulkDelete, toggleSelectNote, exitBulkDeleteMode, DeleteButtons } from './DeleteNote';
 
 export default function App() {
@@ -42,9 +42,6 @@ export default function App() {
   const [statusBarColor, setStatusBarColor] = useState('#262626');
   const [isAtBottom, setIsAtBottom] = useState(false);
   const TouchableComponent = Platform.OS === "android" ? TouchableNativeFeedback : TouchableOpacity;
-  const [undoStack, setUndoStack] = useState([]);
-  const [redoStack, setRedoStack] = useState([]);
-  const [showUndoRedo, setShowUndoRedo] = useState(false);
   const [pressedIndex, setPressedIndex] = useState(null);
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState(new Set());
@@ -66,6 +63,8 @@ export default function App() {
       if (contentInputRef.current) {
         richEditorContent = await contentInputRef.current.getContentHtml();
       }
+
+      console.log("About to Save:", {title: titleRef.current, content: richEditorContent});
   
       if (titleRef.current || richEditorContent) {
         console.log("Saving note");
@@ -117,8 +116,6 @@ export default function App() {
           tempCreatedDateRef.current = null;
           return newNotes;
         });
-  
-        setUndoStack([...undoStack, [...notes]]);
       }
     } catch (error) {
       console.log("An error occurred while saving:", error);
@@ -317,24 +314,21 @@ export default function App() {
     }
     setIsSaved(false);
     setSelectedEmoji(getEmojiSizeForTitle(text));
+    debouncedSaveNote();
   };  
 
-  let debounceTimer;
   const handleContentChange = async () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(async () => {
-      if (contentInputRef.current) {
-        const htmlContent = await contentInputRef.current.getContentHtml();
-        console.log("Content changed");
-        setContent(htmlContent);
-        if (!isViewMode) {
-          setHasChanged(true);
-        }
-        setIsSaved(false);
+    if (contentInputRef.current) {
+      const htmlContent = await contentInputRef.current.getContentHtml();
+      console.log("Content changed");
+      setContent(htmlContent);
+      if (!isViewMode) {
+        setHasChanged(true);
       }
-    }, 300);
+      setIsSaved(false);
+      debouncedSaveNote();  // Use debounced function here
+    }
   };
-  
   
 
   const theme = {
@@ -377,6 +371,60 @@ export default function App() {
  }, [hasChanged]);
 
   useEffect(() => {
+    if (isAddingNote && hasChangedRef.current) {
+      console.log("Setting up auto-save interval");
+
+      const autoSaveInterval = setInterval(async () => {
+        if (hasChangedRef.current && !isSavedRef.current) {
+          console.log("Auto-saving note");
+          try {
+            await saveNote();
+            setHasChanged(false);
+            setIsSaved(true);
+          } catch (e) {
+            console.log("Auto-save failed. Retrying...");
+            await saveNote(); // Retry once more
+          }
+        }
+      }, 2000);
+
+      return () => {
+        console.log("Clearing auto-save interval");
+        clearInterval(autoSaveInterval);
+      };
+    }
+  }, [isAddingNote, hasChanged]);
+
+
+  useEffect(() => {
+    titleRef.current = title;
+  }, [title]);
+
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
+  useEffect(() => {
+    isSavedRef.current = isSaved;
+  }, [isSaved]);  
+
+  useEffect(() => {
+    notesRef.current = notes;
+  }, [notes]);
+
+  const debouncedSaveNote = debounce(async () => {
+    try {
+      await saveNote();
+      setHasChanged(false);
+      setIsSaved(true);
+    } catch (e) {
+      console.log("Auto-save failed. Retrying...");
+      await saveNote(); // Retry once more
+    }
+  }, 500);  // Debounce time in milliseconds
+
+  
+  useEffect(() => {
   const loadBackgroundColor = async () => {
     try {
       const savedColor = await AsyncStorage.getItem('selectedBackgroundColor');
@@ -415,70 +463,6 @@ export default function App() {
       console.log("Error loading notes:", error);
     }
   };
-
-  useEffect(() => {
-    if (isAddingNote && hasChangedRef.current) {
-        console.log("Setting up auto-save interval");
-        
-        const autoSaveInterval = setInterval(async () => {
-          if (hasChangedRef.current && !isSavedRef.current) {
-            console.log("Auto-saving note");
-            await saveNote();
-            setHasChanged(false);
-            setIsSaved(true);
-          }
-        }, 2000);        
-
-        return () => {
-            console.log("Clearing auto-save interval");
-            clearInterval(autoSaveInterval);
-        };
-    }
-}, [isAddingNote, hasChanged]);
-
-  useEffect(() => {
-    titleRef.current = title;
-  }, [title]);
-
-  useEffect(() => {
-    contentRef.current = content;
-  }, [content]);
-
-  useEffect(() => {
-    isSavedRef.current = isSaved;
-  }, [isSaved]);  
-
-  useEffect(() => {
-    notesRef.current = notes;
-  }, [notes]);
-
-  useEffect(() => {
-    const loadShowUndoRedo = async () => {
-      try {
-        const savedState = await AsyncStorage.getItem('showUndoRedo');
-        if (savedState !== null) {
-          setShowUndoRedo(JSON.parse(savedState));
-        }
-      } catch (error) {
-        console.log("Error loading showUndoRedo state:", error);
-      }
-    };
-  
-    loadShowUndoRedo();
-  }, []);
-  
-
-  useEffect(() => {
-    const saveShowUndoRedo = async () => {
-      try {
-        await AsyncStorage.setItem('showUndoRedo', JSON.stringify(showUndoRedo));
-      } catch (error) {
-        console.log("Error saving showUndoRedo state:", error);
-      }
-    };
-  
-    saveShowUndoRedo();
-  }, [showUndoRedo]);
 
 
   return (
@@ -522,27 +506,7 @@ export default function App() {
                                 selectionColor="#4c2a5b"
                             />
                         </TouchableOpacity>
-                        {showUndoRedo && (
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                  {/* Undo Button */}
-                                  <TouchableOpacity onPress={() => undo(undoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, redoStack, notes, setRedoStack, setNotes, contentInputRef)}>
-                                    <MaterialCommunityIcons 
-                                      name="undo" 
-                                      size={30} 
-                                      color="#777" 
-                                    />
-                                  </TouchableOpacity>
-
-                                  {/* Redo Button */}
-                                  <TouchableOpacity onPress={() => redo(redoStack, editingNoteIdRef, setTitle, setContent, setHasChanged, setIsSaved, undoStack, notes, setUndoStack, setNotes, contentInputRef)}>
-                                    <MaterialCommunityIcons 
-                                      name="redo" 
-                                      size={30} 
-                                      color="#777" 
-                                    />
-                                  </TouchableOpacity>
-                                </View>
-                              )}
+                        
                         <TouchableOpacity 
                             onPress={async () => {
                                 await saveNote();
@@ -559,7 +523,6 @@ export default function App() {
                         {/* opening Options menu for OptionsMenu.js */}
                         <TouchableComponent
                                   onPress={async () => {
-                                    // Blur the RichEditor here
                                     contentInputRef.current?.blurContentEditor();
                                     setNoteToDeleteId(editingNoteIdRef.current);
                                     setOptionsDialogVisible(true);
@@ -679,7 +642,7 @@ export default function App() {
                           <IconButton icon="arrow-down" size={20} color="#777" />
                         </View>
                       )}
-
+                      
                     {
                         hasLoadedNotes && notes.length === 0 ? (
                           <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'flex-end' }}>
@@ -754,7 +717,7 @@ export default function App() {
                 )}
 
               <Portal>
-                <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} showUndoRedo={showUndoRedo} toggleUndoRedo={() => setShowUndoRedo(!showUndoRedo)} undo={undo} redo={redo} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
+                <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
               </Portal>
     </View>
     </Provider>
