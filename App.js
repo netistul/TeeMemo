@@ -22,6 +22,7 @@ export default function App() {
   const isSavedRef = useRef(isSaved);
   const [hasChanged, setHasChanged] = useState(false);
   const hasChangedRef = useRef(hasChanged);
+  const [contentChanged, setContentChanged] = useState(false);
   const titleRef = useRef(title);
   const contentRef = useRef(content);
   const notesRef = useRef(notes);
@@ -76,7 +77,7 @@ export default function App() {
     }
 
     console.log("Time taken for getContentHtml:", Date.now() - start1);
-    console.log("About to Save:", { title: titleRef.current, content: richEditorContent });
+    console.log("About to Save (inside  const saveNote):", { title: titleRef.current, content: richEditorContent });
 
     if (titleRef.current || richEditorContent) {
       console.log("Saving note");
@@ -125,6 +126,7 @@ export default function App() {
 
           console.log("Time taken for AsyncStorage.setItem:", Date.now() - start2);
           setIsSaved(true);
+          setContentChanged(false);
           hasChangedRef.current = false;
           setHasChanged(false);
         } catch (storageError) {
@@ -159,7 +161,7 @@ export default function App() {
 
     // Directly call the save function for the title
     saveNote().then(() => {
-      setHasChanged(false);
+      
       setIsSaved(true);
     }).catch(e => {
       console.log("Save for title failed. Retrying...");
@@ -171,6 +173,7 @@ export default function App() {
 
   const handleContentChange = () => {
     console.log("handleContentChange Called");
+    setContentChanged(true);
 
     hasChangedRef.current = true;
 
