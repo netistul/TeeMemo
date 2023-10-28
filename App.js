@@ -125,6 +125,7 @@ export default function App() {
 
           console.log("Time taken for AsyncStorage.setItem:", Date.now() - start2);
           setIsSaved(true);
+          hasChangedRef.current = false;
           setHasChanged(false);
         } catch (storageError) {
           console.log("Error saving note:", storageError);
@@ -171,6 +172,8 @@ export default function App() {
   const handleContentChange = () => {
     console.log("handleContentChange Called");
 
+    hasChangedRef.current = true;
+
     if (debouncedSaveNote) {
       debouncedSaveNote.cancel(); // Cancel the previous debounced function
     }
@@ -189,27 +192,48 @@ export default function App() {
     debouncedSaveNote(); // Start the debounced function
   };
 
+  const handleExit = async () => {
+    if (debouncedSaveNote) {
+      debouncedSaveNote.cancel();  // Cancel any pending debounced save operations
+      console.log('Cancelled pending debounced save');
+    }
   
-  const handleBackPress = async () => {
-    console.log('Back button pressed');  // Debug log
-    if (isAddingNote) {
-      console.log('In adding note mode');  // Debug log
-      if (hasChanged) {
-        console.log('Changes detected, saving...');  // Debug log
-        await saveNote();  // Wait for saveNote to complete
-        console.log('Changes saved');  // Debug log
+    if (hasChangedRef.current) {  // Use the ref here
+      console.log('Unsaved changes detected, saving...');
+      // Explicitly fetch the content from the Rich Editor here
+      let editorContent = '';
+      if (contentInputRef.current) {
+        editorContent = await contentInputRef.current.getContentHtml();
       }
-      
-      setIsAddingNote(false);
-      loadNotes();
-      setTitle('');
-      setContent('');
-      setEditMode(false);
+  
+      if (editorContent) {
+        await saveNote();  // Wait until the save operation is complete
+        console.log('Changes saved');
+      }
+      hasChangedRef.current = false;  // Reset the flag using the ref
+    } else {
+      console.log('No unsaved changes, skipping save');
+    }
+    
+    console.log('About to change states and load notes');  // New debug log
+    setIsAddingNote(false);
+    loadNotes();
+    setTitle('');
+    setContent('');
+    setEditMode(false);
+    console.log('States changed and notes loaded');  // New debug log
+  };
+  
+    
+  const handleBackPress = async () => {
+    console.log('Back button pressed');
+    if (isAddingNote) {
+      console.log('In adding note mode');
+      await handleExit();
       return true;
     }
     return false;
   };
-  
   
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -487,16 +511,7 @@ export default function App() {
                 <TouchableComponent
                       onPress={async () => {
                         console.log('Back arrow pressed'); // Add logging
-                        if (hasChanged) {
-                          console.log('Changes detected, saving...'); // Add logging
-                          await saveNote();
-                          console.log('Changes saved'); // Add logging
-                        }
-                        setIsAddingNote(false);
-                        loadNotes();
-                        setTitle('');
-                        setContent('');
-                        setEditMode(false);
+                        await handleExit();
                       }}                      
                       background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
 
