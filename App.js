@@ -1,7 +1,7 @@
 import { Button, Menu, IconButton, DefaultTheme, Portal, Provider} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState, useEffect,useRef } from 'react';
-import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, ScrollView, TouchableOpacity, Keyboard, TouchableNativeFeedback, BackHandler, FlatList, Image, Animated} from 'react-native';
+import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, ScrollView, TouchableOpacity, Keyboard, TouchableNativeFeedback, BackHandler, FlatList, Image, Animated, Linking} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
 import * as ImagePicker from 'expo-image-picker';
@@ -501,6 +501,7 @@ export default function App() {
     } catch (error) {
       console.log("Error loading notes:", error);
     }
+    setHasLoadedNotes(true);
   };
 
 
@@ -612,6 +613,15 @@ export default function App() {
                         contentInputRef.current?.setContentHTML('');
                       }
                     }}
+                    onLink={(url) => {
+                      Linking.canOpenURL(url).then((supported) => {
+                        if (supported) {
+                          Linking.openURL(url);
+                        } else {
+                          console.log(`Don't know how to open URL: ${url}`);
+                        }
+                      });
+                    }}
                   />
                 </ScrollView>
               {isKeyboardVisible && (
@@ -627,12 +637,12 @@ export default function App() {
                     actions.setItalic,
                     actions.insertBulletsList,
                     actions.insertOrderedList,
-                    actions.insertLink,
                     actions.setStrikethrough,
                     actions.setUnderline,
-                    actions.checkboxList,
                     actions.foreColor,
                     actions.insertImage,
+                    actions.checkboxList,
+                    actions.insertLink,
                   ]}
                   style={styles.richTextToolbarStyle}
                   iconMap={{
