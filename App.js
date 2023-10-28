@@ -33,7 +33,6 @@ export default function App() {
   const [noteToDeleteId, setNoteToDeleteId] = useState(null);
   const [isOptionsDialogVisible, setOptionsDialogVisible] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
-  const [isViewMode, setIsViewMode] = useState(false);
   const [noteBackgroundColor, setNoteBackgroundColor] = useState('#262626');
   const [visible, setVisible] = React.useState(false);
   const [fontSize, setFontSize] = useState(14);
@@ -54,6 +53,7 @@ export default function App() {
   const [isNearEnd, setIsNearEnd] = useState(false);
   const scrollViewRef = useRef(null);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [checkIconColor, setCheckIconColor] = useState("#777");
 
   let isSaveLocked = false;
 
@@ -64,151 +64,181 @@ export default function App() {
     }
   
     isSaveLocked = true;
-  
     console.log("Setting isSaving to true");
     setIsSaving(true);
   
     try {
-    let richEditorContent = '';
-    const start1 = Date.now();
-
-    if (contentInputRef.current) {
-      richEditorContent = await contentInputRef.current.getContentHtml();
+      let richEditorContent = '';
+      const start1 = Date.now();
+  
+      if (contentInputRef.current) {
+        richEditorContent = await contentInputRef.current.getContentHtml();
+      }
+  
+      console.log("Time taken for getContentHtml:", Date.now() - start1);
+      console.log("About to Save (inside const saveNote):", { title: titleRef.current, content: richEditorContent });
+  
+      if (titleRef.current || richEditorContent) {
+        console.log("Saving note");
+  
+        setNotes((prevNotes) => {
+          let newNotes = [...prevNotes];
+          const existingNoteIndex = newNotes.findIndex((note) => note.id === editingNoteIdRef.current);
+  
+          const currentDateTime = new Date();
+          const currentDateTimeString = currentDateTime.toISOString();
+  
+          if (existingNoteIndex !== -1) {
+            // We are editing an existing note
+            const updatedNote = {
+              ...newNotes[existingNoteIndex],
+              title: titleRef.current,
+              content: richEditorContent,
+              lastEdited: currentDateTimeString,
+            };
+  
+            newNotes.splice(existingNoteIndex, 1);
+            newNotes.unshift(updatedNote);
+          } else {
+            // We are adding a new note
+            const newNoteId = Date.now().toString();
+            const newNote = {
+              id: newNoteId,
+              title: titleRef.current,
+              content: richEditorContent,
+              created: tempCreatedDateRef.current || currentDateTimeString,
+              lastEdited: currentDateTimeString,
+            };
+            newNotes.unshift(newNote);
+            editingNoteIdRef.current = newNoteId;
+          }
+  
+          try {
+            const start2 = Date.now();
+            AsyncStorage.setItem('notes', JSON.stringify(newNotes))
+              .then(() => {
+                console.log("Successfully saved to AsyncStorage");
+                setIsSaved(true);
+                setCheckIconColor("#4c2a5b"); // Moved here
+              })
+              .catch((storageError) => {
+                console.log("Error saving note to AsyncStorage:", storageError);
+                setCheckIconColor("#777"); // Moved here
+              });
+  
+            console.log("Time taken for AsyncStorage.setItem:", Date.now() - start2);
+  
+            hasChangedRef.current = false;
+            setHasChanged(false);
+          } catch (storageError) {
+            console.log("Error saving note:", storageError);
+          }
+  
+          tempCreatedDateRef.current = null;
+          return newNotes;
+        });
+      }
+    } catch (error) {
+      console.log("An error occurred while saving:", error);
+      setCheckIconColor("#777"); // If an error occurs
+    } finally {
+      console.log("Setting isSaving to false");
+      setIsSaving(false);
+      isSaveLocked = false; // Reset the lock
     }
+  };
+  
+ 
 
-    console.log("Time taken for getContentHtml:", Date.now() - start1);
-    console.log("About to Save:", { title: titleRef.current, content: richEditorContent });
-
-    if (titleRef.current || richEditorContent) {
-      console.log("Saving note");
-
-      setNotes((prevNotes) => {
-        let newNotes = [...prevNotes];
-        const existingNoteIndex = newNotes.findIndex((note) => note.id === editingNoteIdRef.current);
-
-        const currentDateTime = new Date();
-        const currentDateTimeString = currentDateTime.toISOString();
-
-        if (existingNoteIndex !== -1) {
-          // We are editing an existing note
-          const updatedNote = {
-            ...newNotes[existingNoteIndex],
-            title: titleRef.current,
-            content: richEditorContent,
-            lastEdited: currentDateTimeString,
-          };
-
-          newNotes.splice(existingNoteIndex, 1);
-          newNotes.unshift(updatedNote);
-        } else {
-          // We are adding a new note
-          const newNoteId = Date.now().toString();
-          const newNote = {
-            id: newNoteId,
-            title: titleRef.current,
-            content: richEditorContent,
-            created: tempCreatedDateRef.current || currentDateTimeString,
-            lastEdited: currentDateTimeString,
-          };
-          newNotes.unshift(newNote);
-          editingNoteIdRef.current = newNoteId;
-        }
-
-        try {
-          const start2 = Date.now();
-          AsyncStorage.setItem('notes', JSON.stringify(newNotes))
-            .then(() => {
-              console.log("Successfully saved to AsyncStorage");
-            })
-            .catch((storageError) => {
-              console.log("Error saving note to AsyncStorage:", storageError);
-            });
-
-          console.log("Time taken for AsyncStorage.setItem:", Date.now() - start2);
-          setIsSaved(true);
-          setHasChanged(false);
-        } catch (storageError) {
-          console.log("Error saving note:", storageError);
-        }
-
-        tempCreatedDateRef.current = null;
-        return newNotes;
+  let debouncedSaveTitle = debounce(() => {
+    if (!isSaving) {
+      setIsSaving(true);
+      saveNote().then(() => {
+        setIsSaving(false);
+        // other logic
+      }).catch(() => {
+        setIsSaving(false);
+        // other logic
       });
     }
-  } catch (error) {
-    console.log("An error occurred while saving:", error);
-  } finally {
-    console.log("Setting isSaving to false");
-    setIsSaving(false);
-    isSaveLocked = false; // Reset the lock
-  }
-};
+  }, 1500);
 
+  let debouncedSaveContent = debounce(() => {
+    if (!isSaving) {
+      setIsSaving(true);
+      saveNote().then(() => {
+        setIsSaving(false);
+      }).catch(() => {
+        setIsSaving(false);
+      });
+    }
+  }, 1500);
 
   const handleTitleChange = (text) => {
     console.log("handleTitleChange Called");
-    console.log("Title changed");
     setTitle(text);
-    if (!isViewMode) {
-        setHasChanged(true);
-    }
     setIsSaved(false);
     setSelectedEmoji(getEmojiSizeForTitle(text));
-    console.log("About to call debouncedSaveNoteinside handletitlechange function");
-    debouncedSaveNote();
-  };  
+    debouncedSaveTitle();
+  };
 
-  const handleContentChangeDebounced = debounce(async () => {
-    console.log(`Entered handleContentChangeDebounced at ${new Date().toISOString()}`);
-    if (contentInputRef.current) {
-      const htmlContent = await contentInputRef.current.getContentHtml();
-      console.log("Content changed");
-      setContent(htmlContent);
-      if (!isViewMode) {
-        setHasChanged(true);
-      }
-      setIsSaved(false);
-      console.log(`Calling debouncedSaveNote at ${new Date().toISOString()}`);
-      debouncedSaveNote();  // Use debounced function here
-    }
-  }, 2000); // Adjust the timing as needed
-  
   const handleContentChange = () => {
-    console.log("handleContentChange Called");
-    handleContentChangeDebounced();
+    hasChangedRef.current = true;
+    debouncedSaveContent();
+  };
+
+  const handleExit = async () => {
+    // Cancel any pending debounced save operations for both title and content
+    if (debouncedSaveTitle) {
+      debouncedSaveTitle.cancel();
+      console.log('Cancelled pending debounced save for title');
+    }
+    if (debouncedSaveContent) {
+      debouncedSaveContent.cancel();
+      console.log('Cancelled pending debounced save for content');
+    }
+  
+    if (hasChangedRef.current) {  // Check for unsaved changes
+      console.log('Unsaved changes detected, saving...');
+  
+      // Force save the current content and title before exiting
+      let editorContent = '';
+      if (contentInputRef.current) {
+        editorContent = await contentInputRef.current.getContentHtml();
+      }
+  
+      if (editorContent || title) {
+        await saveNote();
+        console.log('Changes saved');
+      }
+  
+      // Reset the flag using the ref
+      hasChangedRef.current = false;
+    } else {
+      console.log('No unsaved changes, skipping save');
+    }
+  
+    // State updates and loading notes
+    console.log('About to change states and load notes');
+    setIsAddingNote(false);
+    loadNotes();
+    setTitle('');
+    setContent('');
+    setEditMode(false);
+    setCheckIconColor("#777");  // Reset the check icon color to grey
+    console.log('States changed and notes loaded');
   };
   
-  const debouncedSaveNote = debounce(() => {
-    saveNote().then(() => {
-      setHasChanged(false);
-      setIsSaved(true);
-    }).catch(e => {
-      console.log("Auto-save failed. Retrying...");
-      saveNote();
-    });
-  }, 2000);
-  
-  
+    
   const handleBackPress = async () => {
-    console.log('Back button pressed');  // Debug log
+    console.log('Back button pressed');
     if (isAddingNote) {
-      console.log('In adding note mode');  // Debug log
-      if (hasChanged) {
-        console.log('Changes detected, saving...');  // Debug log
-        await saveNote();  // Wait for saveNote to complete
-        console.log('Changes saved');  // Debug log
-      }
-      
-      setIsAddingNote(false);
-      loadNotes();
-      setTitle('');
-      setContent('');
-      setEditMode(false);
+      console.log('In adding note mode');
+      await handleExit();
       return true;
     }
     return false;
   };
-  
   
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -289,7 +319,7 @@ export default function App() {
     };
   }, []);
 
-  const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsViewMode, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
+  const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
 
     return (
       <TouchableOpacity
@@ -299,11 +329,9 @@ export default function App() {
           if (contentInputRef.current && preloadedNotes[note.id]) {
             contentInputRef.current.setContentHTML(preloadedNotes[note.id]);
           }
-          setIsViewMode(true);
           setIsAddingNote(true);
           setTitle(note.title);
           setContent(note.content);
-          setIsViewMode(false);
           editingNoteIdRef.current = note.id;
           setIsSaved(false);
         }}
@@ -488,16 +516,7 @@ export default function App() {
                 <TouchableComponent
                       onPress={async () => {
                         console.log('Back arrow pressed'); // Add logging
-                        if (hasChanged) {
-                          console.log('Changes detected, saving...'); // Add logging
-                          await saveNote();
-                          console.log('Changes saved'); // Add logging
-                        }
-                        setIsAddingNote(false);
-                        loadNotes();
-                        setTitle('');
-                        setContent('');
-                        setEditMode(false);
+                        await handleExit();
                       }}                      
                       background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
 
@@ -529,7 +548,7 @@ export default function App() {
                             <MaterialCommunityIcons 
                                 name="check" 
                                 size={24} 
-                                color={isSaved ? "#4c2a5b" : (hasChanged ? "white" : "#777")} 
+                                color={checkIconColor} 
                             />
                         </TouchableOpacity>
                         {/* opening Options menu for OptionsMenu.js */}
@@ -581,6 +600,9 @@ export default function App() {
                       caretColor: '#9d9fd2',
                     }}
                     onChange={handleContentChange}
+                    onKeyDown={() => {
+                      setCheckIconColor('white');
+                    }}
                     onFocus={() => {
                       if (content === '<div>Start writing...</div>' || !content) {
                         contentInputRef.current?.setContentHTML('');
@@ -686,7 +708,6 @@ export default function App() {
                                 index={index}
                                 setPressedIndex={setPressedIndex}
                                 pressedIndex={pressedIndex}
-                                setIsViewMode={setIsViewMode}
                                 setIsAddingNote={setIsAddingNote}
                                 setTitle={setTitle}
                                 setContent={setContent}
