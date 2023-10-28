@@ -148,20 +148,6 @@ export default function App() {
     }
   };
   
- 
-
-  let debouncedSaveTitle = debounce(() => {
-    if (!isSaving) {
-      setIsSaving(true);
-      saveNote().then(() => {
-        setIsSaving(false);
-        // other logic
-      }).catch(() => {
-        setIsSaving(false);
-        // other logic
-      });
-    }
-  }, 1500);
 
   let debouncedSaveContent = debounce(() => {
     if (!isSaving) {
@@ -179,7 +165,8 @@ export default function App() {
     setTitle(text);
     setIsSaved(false);
     setSelectedEmoji(getEmojiSizeForTitle(text));
-    debouncedSaveTitle();
+    // debouncedSaveTitle();
+    hasChangedRef.current = true;
   };
 
   const handleContentChange = () => {
@@ -188,11 +175,8 @@ export default function App() {
   };
 
   const handleExit = async () => {
-    // Cancel any pending debounced save operations for both title and content
-    if (debouncedSaveTitle) {
-      debouncedSaveTitle.cancel();
-      console.log('Cancelled pending debounced save for title');
-    }
+    // Cancel any pending debounced save operations for content
+
     if (debouncedSaveContent) {
       debouncedSaveContent.cancel();
       console.log('Cancelled pending debounced save for content');
