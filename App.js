@@ -1,7 +1,7 @@
 import { Button, Menu, IconButton, DefaultTheme, Portal, Provider} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useState, useEffect,useRef, useCallback } from 'react';
-import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, ScrollView, TouchableOpacity, Keyboard, TouchableNativeFeedback, BackHandler, FlatList, Image} from 'react-native';
+import React, { useState, useEffect,useRef } from 'react';
+import { View, TextInput, StyleSheet, Platform, StatusBar as RNStatusBar, Text, ScrollView, TouchableOpacity, Keyboard, TouchableNativeFeedback, BackHandler, FlatList, Image, Animated} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
 import * as ImagePicker from 'expo-image-picker';
@@ -54,6 +54,7 @@ export default function App() {
   const scrollViewRef = useRef(null);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [checkIconColor, setCheckIconColor] = useState("#777");
+  const [scale] = useState(new Animated.Value(1));
 
   let isSaveLocked = false;
 
@@ -210,6 +211,7 @@ export default function App() {
     setContent('');
     setEditMode(false);
     setCheckIconColor("#777");  // Reset the check icon color to grey
+    scale.setValue(1);
     console.log('States changed and notes loaded');
   };
   
@@ -223,6 +225,22 @@ export default function App() {
     }
     return false;
   };
+
+  const animateButton = () => {
+    // Reset to default scale
+    scale.setValue(1);
+  
+    // Animate
+    Animated.timing(scale, {
+      toValue: 0.8,
+      duration: 300,
+      useNativeDriver: true,
+
+    }).start(() => {
+      scale.setValue(1);
+    });
+  };
+  
   
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -497,18 +515,20 @@ export default function App() {
         {isAddingNote ? (
             <>
                 <View style={[styles.titleRow, styles.titleSection, { backgroundColor: noteBackgroundColor || '#262626' }]}>
-                <TouchableComponent
-                      onPress={async () => {
-                        console.log('Back arrow pressed'); // Add logging
-                        await handleExit();
-                      }}                      
-                      background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
-
-                  >
-                      <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
+                  <Animated.View style={{ transform: [{ scale: scale }] }}>
+                      <TouchableComponent
+                        onPress={async () => {
+                          animateButton(); // trigger the animation
+                          console.log('Back arrow pressed');
+                          await handleExit();
+                        }}
+                        background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
+                      >
+                        <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
                           <MaterialCommunityIcons name="arrow-left" size={23} color="#9d9292" />
-                      </View>
-                  </TouchableComponent>
+                        </View>
+                      </TouchableComponent>
+                    </Animated.View>
 
                     <View style={{ flexDirection: 'row', flex: 1, alignItems: 'center' }}>
                         <TouchableOpacity activeOpacity={1} style={{ flex: 1 }}>
