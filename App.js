@@ -33,7 +33,6 @@ export default function App() {
   const [noteToDeleteId, setNoteToDeleteId] = useState(null);
   const [isOptionsDialogVisible, setOptionsDialogVisible] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
-  const [isViewMode, setIsViewMode] = useState(false);
   const [noteBackgroundColor, setNoteBackgroundColor] = useState('#262626');
   const [visible, setVisible] = React.useState(false);
   const [fontSize, setFontSize] = useState(14);
@@ -144,50 +143,52 @@ export default function App() {
   }
 };
 
-
   const handleTitleChange = (text) => {
     console.log("handleTitleChange Called");
     console.log("Title changed");
     setTitle(text);
-    if (!isViewMode) {
-        setHasChanged(true);
-    }
     setIsSaved(false);
     setSelectedEmoji(getEmojiSizeForTitle(text));
-    console.log("About to call debouncedSaveNoteinside handletitlechange function");
-    debouncedSaveNote();
-  };  
+    console.log("About to call saveNote directly inside handleTitleChange function");
 
-  const handleContentChangeDebounced = debounce(async () => {
-    console.log(`Entered handleContentChangeDebounced at ${new Date().toISOString()}`);
-    if (contentInputRef.current) {
-      const htmlContent = await contentInputRef.current.getContentHtml();
-      console.log("Content changed");
-      setContent(htmlContent);
-      if (!isViewMode) {
-        setHasChanged(true);
-      }
-      setIsSaved(false);
-      console.log(`Calling debouncedSaveNote at ${new Date().toISOString()}`);
-      debouncedSaveNote();  // Use debounced function here
+    // If a debounced save operation for content is in progress, cancel it
+    if (debouncedSaveNote) {
+      debouncedSaveNote.cancel();
     }
-  }, 2000); // Adjust the timing as needed
-  
-  const handleContentChange = () => {
-    console.log("handleContentChange Called");
-    handleContentChangeDebounced();
-  };
-  
-  const debouncedSaveNote = debounce(() => {
+
+    // Directly call the save function for the title
     saveNote().then(() => {
       setHasChanged(false);
       setIsSaved(true);
     }).catch(e => {
-      console.log("Auto-save failed. Retrying...");
+      console.log("Save for title failed. Retrying...");
       saveNote();
     });
-  }, 2000);
+  };
   
+  let debouncedSaveNote = null;
+
+  const handleContentChange = () => {
+    console.log("handleContentChange Called");
+
+    if (debouncedSaveNote) {
+      debouncedSaveNote.cancel(); // Cancel the previous debounced function
+    }
+
+    debouncedSaveNote = debounce(() => {
+      console.log("Debounced function is executing at " + new Date().toISOString());
+      saveNote().then(() => {
+        setHasChanged(false);
+        setIsSaved(true);
+      }).catch(e => {
+        console.log("Auto-save failed. Retrying...");
+        saveNote();
+      });
+    }, 1500);
+
+    debouncedSaveNote(); // Start the debounced function
+  };
+
   
   const handleBackPress = async () => {
     console.log('Back button pressed');  // Debug log
@@ -289,7 +290,7 @@ export default function App() {
     };
   }, []);
 
-  const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsViewMode, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
+  const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
 
     return (
       <TouchableOpacity
@@ -299,11 +300,9 @@ export default function App() {
           if (contentInputRef.current && preloadedNotes[note.id]) {
             contentInputRef.current.setContentHTML(preloadedNotes[note.id]);
           }
-          setIsViewMode(true);
           setIsAddingNote(true);
           setTitle(note.title);
           setContent(note.content);
-          setIsViewMode(false);
           editingNoteIdRef.current = note.id;
           setIsSaved(false);
         }}
@@ -686,7 +685,6 @@ export default function App() {
                                 index={index}
                                 setPressedIndex={setPressedIndex}
                                 pressedIndex={pressedIndex}
-                                setIsViewMode={setIsViewMode}
                                 setIsAddingNote={setIsAddingNote}
                                 setTitle={setTitle}
                                 setContent={setContent}
