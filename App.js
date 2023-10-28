@@ -23,6 +23,7 @@ export default function App() {
   const [hasChanged, setHasChanged] = useState(false);
   const hasChangedRef = useRef(hasChanged);
   const [contentChanged, setContentChanged] = useState(false);
+  const hasContentChangedRef = useRef(hasChanged);
   const titleRef = useRef(title);
   const contentRef = useRef(content);
   const notesRef = useRef(notes);
@@ -126,7 +127,10 @@ export default function App() {
 
           console.log("Time taken for AsyncStorage.setItem:", Date.now() - start2);
           setIsSaved(true);
-          setContentChanged(false);
+          console.log("Before setting contentChanged:", contentChanged);
+setContentChanged(false);
+console.log("After setting contentChanged:", contentChanged);
+
           hasChangedRef.current = false;
           setHasChanged(false);
         } catch (storageError) {
@@ -161,8 +165,12 @@ export default function App() {
 
     // Directly call the save function for the title
     saveNote().then(() => {
-      
+      setHasChanged(false);
       setIsSaved(true);
+      console.log("Before setting contentChanged:", contentChanged);
+setContentChanged(false);
+console.log("After setting contentChanged:", contentChanged);
+
     }).catch(e => {
       console.log("Save for title failed. Retrying...");
       saveNote();
@@ -248,6 +256,14 @@ export default function App() {
   useEffect(() => {
     hasChangedRef.current = hasChanged;
  }, [hasChanged]);
+
+  useEffect(() => {
+    hasContentChangedRef.current = contentChanged;
+  }, [contentChanged]);
+
+  useEffect(() => {
+    console.log('contentChanged has been updated:', contentChanged);
+  }, [contentChanged]);
 
 
   useEffect(() => {
@@ -546,7 +562,7 @@ export default function App() {
                             <MaterialCommunityIcons 
                                 name="check" 
                                 size={24} 
-                                color={isSaved ? "#4c2a5b" : (hasChanged ? "white" : "#777")} 
+                                color={isSaved ? "#4c2a5b" : (contentChanged ? "white" : "#777")} 
                             />
                         </TouchableOpacity>
                         {/* opening Options menu for OptionsMenu.js */}
