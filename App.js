@@ -324,8 +324,11 @@ export default function App() {
   const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
 
     return (
-      <TouchableOpacity
+      <TouchableScale
         key={note.id}
+        tension={50}
+        friction={7}
+        activeScale={0.95} 
         onLongPress={() => handleLongPressNote(note.id)}
         onPress={() => {
           if (contentInputRef.current) {
@@ -370,7 +373,7 @@ export default function App() {
             {note.content.length > 200 ? note.content.replace(/\n+/g, '\n').substring(0, 200) + '...' : note.content.replace(/\n+/g, '\n')}
           </Text>
         </View>
-      </TouchableOpacity>
+      </TouchableScale>
        
     );
   };
