@@ -328,8 +328,8 @@ export default function App() {
         key={note.id}
         onLongPress={() => handleLongPressNote(note.id)}
         onPress={() => {
-          if (contentInputRef.current && preloadedNotes[note.id]) {
-            contentInputRef.current.setContentHTML(preloadedNotes[note.id]);
+          if (contentInputRef.current) {
+            contentInputRef.current.setContentHTML(note.content);
           }
           setIsAddingNote(true);
           setTitle(note.title);
@@ -596,7 +596,8 @@ export default function App() {
                     customCSS={`body { font-size: 28px; }`}
                     style={styles.contentInput}
                     androidHardwareAccelerationDisabled={true}
-                    initialContentHTML={content || '<div>Start writing...</div>'}
+                    initialContentHTML={content}
+                    placeholder={"Start writing..."}
                     editorStyle={{
                       contentCSSText: `font-size: ${fontSize}px;`,
                       backgroundColor: noteBackgroundColor || '#262626',
@@ -609,9 +610,7 @@ export default function App() {
                       setCheckIconColor('white');
                     }}
                     onFocus={() => {
-                      if (content === '<div>Start writing...</div>' || !content) {
-                        contentInputRef.current?.setContentHTML('');
-                      }
+                      setCheckIconColor('white');
                     }}
                     onLink={(url) => {
                       Linking.canOpenURL(url).then((supported) => {
