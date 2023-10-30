@@ -7,6 +7,7 @@ import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor'
 import * as ImagePicker from 'expo-image-picker';
 import ColorPicker from 'react-native-wheel-color-picker';
 import { debounce } from 'lodash';
+import TouchableScale from 'react-native-touchable-scale';
 
 import OptionsMenu from './OptionsMenu';
 import { CustomCheckBox, deleteNote, handleBulkDelete, toggleSelectNote, exitBulkDeleteMode, DeleteButtons } from './DeleteNote';
@@ -331,15 +332,17 @@ export default function App() {
         activeScale={0.95} 
         onLongPress={() => handleLongPressNote(note.id)}
         onPress={() => {
-          if (contentInputRef.current) {
-            contentInputRef.current.setContentHTML(note.content);
-          }
-          setIsAddingNote(true);
-          setTitle(note.title);
-          setContent(note.content);
-          editingNoteIdRef.current = note.id;
-          setIsSaved(false);
-        }}
+          requestAnimationFrame(() => {
+            if (contentInputRef.current) {
+              contentInputRef.current.setContentHTML(note.content);
+            }
+            setIsAddingNote(true);
+            setTitle(note.title);
+            setContent(note.content);
+            editingNoteIdRef.current = note.id;
+            setIsSaved(false);
+          });
+        }}        
       >
         <View style={[styles.customCard, { backgroundColor: getColorByIndex(index) }]}>
         {isBulkDeleteMode && (
