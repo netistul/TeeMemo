@@ -5,7 +5,6 @@ import { TouchableOpacity, View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
   export const deleteNote = async (noteToDeleteId, setNotes, setDeleteDialogVisible, setIsAddingNote, setTitle, setContent, editingNoteIdRef, notes) => {
-    // Existing logic to remove note from the list
     setNotes(prevNotes => prevNotes.filter(note => note.id !== noteToDeleteId));
     
     // Check if this was the startup note and remove it if so
@@ -14,20 +13,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
         await AsyncStorage.removeItem('startupNoteId');
     }
     
-    // Save the updated notes to AsyncStorage
     try {
         AsyncStorage.setItem('notes', JSON.stringify(notes.filter(note => note.id !== noteToDeleteId)));
     } catch (error) {
         console.log("Error deleting note:", error);
     }
-    
-    // Reset the note input form
+
     setIsAddingNote(false);
     setTitle('');
     setContent('');
     editingNoteIdRef.current = null;
     
-    // Close the delete dialog
     setDeleteDialogVisible(false);
   };
   

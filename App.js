@@ -388,7 +388,7 @@ export default function App() {
 
   const stripHtmlTags = (str) => {
     if ((str === null) || (str === '')) {
-      return '';  // Return empty string instead of false
+      return '';
     } else {
       str = str.toString();
       return str.replace(/<[^>]*>/g, '');
@@ -559,7 +559,7 @@ export default function App() {
                   <Animated.View style={{ transform: [{ scale: scale }] }}>
                       <TouchableComponent
                         onPress={async () => {
-                          animateButton(); // trigger the animation
+                          animateButton();
                           console.log('Back arrow pressed');
                           await handleExit();
                         }}

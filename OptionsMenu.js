@@ -220,29 +220,26 @@ export default function OptionsMenu(props) {
         );
     }
 
-    // This function will show the modal and auto-hide it after 5 seconds
     const showAndHideModal = () => {
         setSnackbarVisible(true);
         setTimeout(() => {
         setSnackbarVisible(false);
-        }, 4000);
+        }, 3000);
     };
 
     const fadeInOut = () => {
-        // Fade-in animation
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 1000,
           useNativeDriver: true,
         }).start(() => {
-          // After fade-in is complete, start fade-out
           setTimeout(() => {
             Animated.timing(fadeAnim, {
               toValue: 0,
               duration: 1000,
               useNativeDriver: true,
             }).start();
-          }, 2000); // stay visible for 2 seconds before starting the fade-out
+          }, 2000);
         });
       };
 
