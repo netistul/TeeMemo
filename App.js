@@ -587,18 +587,19 @@ export default function App() {
                         </TouchableOpacity>
                         {/* opening Options menu for OptionsMenu.js */}
                         <TouchableComponent
-                                  onPress={async () => {
-                                    contentInputRef.current?.blurContentEditor();
-                                    setNoteToDeleteId(editingNoteIdRef.current);
-                                    setOptionsDialogVisible(true);
-                                    Keyboard.dismiss();
-                                  }}
-                                  background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
-                              >
-                                  <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
-                                      <MaterialCommunityIcons name="dots-vertical" size={24} color="#777" />
-                                  </View>
-                              </TouchableComponent>
+  onPress={async () => {
+    contentInputRef.current?.blurContentEditor();
+    setNoteToDeleteId(editingNoteIdRef.current);
+    setOptionsMenuVisible(true); // Toggle the Menu visibility instead of Dialog
+    Keyboard.dismiss();
+  }}
+  background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
+>
+  <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
+    <MaterialCommunityIcons name="dots-vertical" size={24} color="#777" />
+  </View>
+</TouchableComponent>
+
 
                     </View>
                 </View>
@@ -678,10 +679,10 @@ export default function App() {
                       <TouchableOpacity onPress={() => {
                         setColorPickerVisible(!isColorPickerVisible);
                       }}>                          
-                        <MaterialCommunityIcons name="palette" size={24} color="white" />
+                        <MaterialCommunityIcons name="palette" size={24} color={currentColor || "white"} />
                       </TouchableOpacity>
                     ),
-                  }}
+                  }}                  
                 />
               )}
               </>

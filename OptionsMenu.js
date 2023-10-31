@@ -1,4 +1,4 @@
-import { DefaultTheme, Button, Menu, Dialog, Portal, Snackbar} from 'react-native-paper';
+import { DefaultTheme, Button, Menu, Dialog, Portal} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState, useEffect, useRef } from 'react';
@@ -274,6 +274,7 @@ export default function OptionsMenu(props) {
                 )}>Delete</Button>
             </Dialog.Actions>
         </Dialog>
+        
         <Dialog visible={isOptionsDialogVisible} onDismiss={() => setOptionsDialogVisible(false)} style={{ backgroundColor: '#333' }}> 
                                         <TouchableOpacity 
                                         onPress={async () => {
