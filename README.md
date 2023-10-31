@@ -1,6 +1,6 @@
 # TeeMemo 📝🦉
 TeeMemo was born out of the need for a clean, offline, fast, yet feature-rich notes app.  
-The goal was to create an app for taking notes as quickly and simply as possible, with all notes being entirely offline.
+The goal was to create an app for taking notes as quickly as possible, with all notes being entirely offline.
 ## Features
 - Entirely offline notes
 - Changeable font contrast
