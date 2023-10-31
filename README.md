@@ -12,17 +12,7 @@ The goal was to create an app for taking notes as quickly as possible, with all 
 - Backup & restore notes directly to your cloud account (e.g., Google Drive)
 - Set a note to display at startup
 - Write in any color
-- Rich Text Editing Features:
-  - Bold
-  - Italic
-  - Bullet List
-  - Ordered List
-  - Strikethrough
-  - Underline
-  - Text Color
-  - Add Images
-  - Checkbox List
-  - Insert Links
+- Rich Text Editing: Includes features like bold, italics, adding images, and more
 - Very clean interface
 
 <a href="https://play.google.com">
