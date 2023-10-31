@@ -230,7 +230,7 @@ export default function OptionsMenu(props) {
   const fadeInOut = () => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 1000,
+      duration: 0,
       useNativeDriver: true,
     }).start(() => {
       setTimeout(() => {
@@ -981,8 +981,8 @@ export default function OptionsMenu(props) {
                 style={{
                   opacity: fadeAnim,
                   backgroundColor: "rgba(68,48,78,0.9)",
-                  padding: 8,
-                  borderRadius: 8,
+                  padding: 5,
+                  borderRadius: 5,
                 }}
               >
                 <Text style={{ color: "white", fontSize: 20 }}>
