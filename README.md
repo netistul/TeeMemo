@@ -14,5 +14,4 @@ The goal was to create an app for taking notes as quickly and simply as possible
 - Write in any color
 - Bold/Italic/Strikethrough/Underline text
 - Very clean interface
-- And other cool features
 [![Download from Google Play](https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png)](https://play.google.com)
