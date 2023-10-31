@@ -33,6 +33,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
   
   export const handleBulkDelete = async (selectedNotes, setNotes, setIsBulkDeleteMode, setSelectedNotes, notes) => {
     const newNotes = notes.filter(note => !selectedNotes.has(note.id));
+    
+    // Check if the startupNoteId is in the set of selectedNotes to be deleted
+    const startupNoteId = await AsyncStorage.getItem('startupNoteId');
+    if (selectedNotes.has(startupNoteId)) {
+      await AsyncStorage.removeItem('startupNoteId');
+    }
+  
     try {
       await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
     } catch (error) {
@@ -41,7 +48,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
     setNotes(newNotes);
     setIsBulkDeleteMode(false);
     setSelectedNotes(new Set());
-  };
+  };  
   
   export const toggleSelectNote = (noteId, setSelectedNotes) => {
     setSelectedNotes(prevSelected => {
