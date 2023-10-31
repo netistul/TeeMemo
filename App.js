@@ -322,6 +322,7 @@ export default function App() {
     };
   }, []);
 
+
   const ListItem = ({ note, index, setPressedIndex, pressedIndex, setIsAddingNote, setTitle, setContent, setIsSaved, editingNoteIdRef, contentInputRef, styles, getEmojiForNote, getEmojiSizeForTitle, getColorByIndex }) => {
 
     return (
@@ -373,7 +374,9 @@ export default function App() {
             </View>
           </View>
           <Text style={styles.customContent}>
-            {note.content.length > 200 ? note.content.replace(/\n+/g, '\n').substring(0, 200) + '...' : note.content.replace(/\n+/g, '\n')}
+            {note.content.length > 200 
+              ? stripHtmlTags(note.content).replace(/\n+/g, '\n').substring(0, 200) + '...'
+              : stripHtmlTags(note.content).replace(/\n+/g, '\n')}
           </Text>
         </View>
       </TouchableScale>
@@ -383,7 +386,15 @@ export default function App() {
 
   const MemoizedListItem = React.memo(ListItem);
 
-
+  const stripHtmlTags = (str) => {
+    if ((str === null) || (str === '')) {
+      return '';  // Return empty string instead of false
+    } else {
+      str = str.toString();
+      return str.replace(/<[^>]*>/g, '');
+    }
+  };
+  
   const handleLongPressNote = (noteId) => {
     setIsBulkDeleteMode(true);
     setSelectedNotes(new Set([...selectedNotes, noteId]));

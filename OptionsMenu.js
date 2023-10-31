@@ -23,6 +23,7 @@ export default function OptionsMenu(props) {
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [isStartupNote, setIsStartupNote] = useState(false);
     const [checkCompleted, setCheckCompleted] = useState(false);
+    const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         const checkStartupNote = async () => {
@@ -224,8 +225,33 @@ export default function OptionsMenu(props) {
         setSnackbarVisible(true);
         setTimeout(() => {
         setSnackbarVisible(false);
-        }, 3000);
+        }, 4000);
     };
+
+    const fadeInOut = () => {
+        // Fade-in animation
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }).start(() => {
+          // After fade-in is complete, start fade-out
+          setTimeout(() => {
+            Animated.timing(fadeAnim, {
+              toValue: 0,
+              duration: 1000,
+              useNativeDriver: true,
+            }).start();
+          }, 2000); // stay visible for 2 seconds before starting the fade-out
+        });
+      };
+
+      useEffect(() => {
+        if (snackbarVisible) {
+          fadeInOut();
+        }
+      }, [snackbarVisible]);
+            
 
     return (
         <>
@@ -674,19 +700,19 @@ export default function OptionsMenu(props) {
     </Dialog>
                                   {/* Alert dialog after setting a note at startup */}
                                   <Modal
-                                    animationType="slide"
+                                    animationType="none" 
                                     transparent={true}
                                     visible={snackbarVisible}
                                     onRequestClose={() => setSnackbarVisible(false)}
                                     >
                                     <TouchableWithoutFeedback onPress={() => setSnackbarVisible(false)}>
-                                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                        <View style={{ flex: 1, justifyContent: 'top', alignItems: 'top' }}>
                                         <TouchableWithoutFeedback>
-                                            <View style={{ backgroundColor: '#8850a4', padding: 20, borderRadius: 10 }}>
-                                            <Text style={{ color: 'white', fontSize: 18 }}>
+                                            <Animated.View style={{ opacity: fadeAnim, backgroundColor: 'rgba(68,48,78,0.9)', padding: 8, borderRadius: 8 }}>
+                                            <Text style={{ color: 'white', fontSize: 20 }}>
                                                 {'Startup Note Updated \u{1F989}'}
                                             </Text>
-                                            </View>
+                                            </Animated.View>
                                         </TouchableWithoutFeedback>
                                         </View>
                                     </TouchableWithoutFeedback>
