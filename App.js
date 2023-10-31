@@ -61,12 +61,10 @@ export default function App() {
 
   const saveNote = async () => {
     if (isSaveLocked) {
-      console.log("Save operation is locked. Exiting...");
       return;
     }
   
     isSaveLocked = true;
-    console.log("Setting isSaving to true");
     setIsSaving(true);
   
     try {
@@ -77,11 +75,7 @@ export default function App() {
         richEditorContent = await contentInputRef.current.getContentHtml();
       }
   
-      console.log("Time taken for getContentHtml:", Date.now() - start1);
-      console.log("About to Save (inside const saveNote):", { title: titleRef.current, content: richEditorContent });
-  
       if (titleRef.current || richEditorContent) {
-        console.log("Saving note");
   
         setNotes((prevNotes) => {
           let newNotes = [...prevNotes];
@@ -119,16 +113,13 @@ export default function App() {
             const start2 = Date.now();
             AsyncStorage.setItem('notes', JSON.stringify(newNotes))
               .then(() => {
-                console.log("Successfully saved to AsyncStorage");
                 setIsSaved(true);
-                setCheckIconColor("#4c2a5b"); // Moved here
+                setCheckIconColor("#4c2a5b");
               })
               .catch((storageError) => {
                 console.log("Error saving note to AsyncStorage:", storageError);
-                setCheckIconColor("#777"); // Moved here
+                setCheckIconColor("#777");
               });
-  
-            console.log("Time taken for AsyncStorage.setItem:", Date.now() - start2);
   
             hasChangedRef.current = false;
             setHasChanged(false);
@@ -142,11 +133,10 @@ export default function App() {
       }
     } catch (error) {
       console.log("An error occurred while saving:", error);
-      setCheckIconColor("#777"); // If an error occurs
+      setCheckIconColor("#777");
     } finally {
-      console.log("Setting isSaving to false");
       setIsSaving(false);
-      isSaveLocked = false; // Reset the lock
+      isSaveLocked = false;
     }
   };
   
@@ -163,7 +153,6 @@ export default function App() {
   }, 1500);
 
   const handleTitleChange = (text) => {
-    console.log("handleTitleChange Called");
     setTitle(text);
     setIsSaved(false);
     setSelectedEmoji(getEmojiSizeForTitle(text));
@@ -181,11 +170,9 @@ export default function App() {
 
     if (debouncedSaveContent) {
       debouncedSaveContent.cancel();
-      console.log('Cancelled pending debounced save for content');
     }
   
     if (hasChangedRef.current) {  // Check for unsaved changes
-      console.log('Unsaved changes detected, saving...');
   
       // Force save the current content and title before exiting
       let editorContent = '';
@@ -195,17 +182,14 @@ export default function App() {
   
       if (editorContent || title) {
         await saveNote();
-        console.log('Changes saved');
       }
   
       // Reset the flag using the ref
       hasChangedRef.current = false;
     } else {
-      console.log('No unsaved changes, skipping save');
     }
   
     // State updates and loading notes
-    console.log('About to change states and load notes');
     setIsAddingNote(false);
     loadNotes();
     setTitle('');
@@ -213,14 +197,11 @@ export default function App() {
     setEditMode(false);
     setCheckIconColor("#777");  // Reset the check icon color to grey
     scale.setValue(1);
-    console.log('States changed and notes loaded');
   };
   
     
   const handleBackPress = async () => {
-    console.log('Back button pressed');
     if (isAddingNote) {
-      console.log('In adding note mode');
       await handleExit();
       return true;
     }
@@ -303,7 +284,6 @@ export default function App() {
   };
 
   const handleColorPickerChange = (color) => {
-    console.log('Color picker changed:', color);
     setCurrentColor(color);
     contentInputRef.current?.setForeColor(color);
   };
@@ -547,122 +527,117 @@ export default function App() {
 
   return (
     <Provider theme={theme}>
-            <View style={styles.container}>
-            {/* Conditionally set the StatusBar color */}
-            {isAddingNote 
-                ? <RNStatusBar backgroundColor={noteBackgroundColor} barStyle="light-content" />
-                : <RNStatusBar backgroundColor="#1e1e2d" barStyle="light-content" />
-            }
+      <View style={styles.container}>
+        {/* Conditionally set the StatusBar color */}
+        {isAddingNote 
+          ? <RNStatusBar backgroundColor={noteBackgroundColor} barStyle="light-content" />
+          : <RNStatusBar backgroundColor="#1e1e2d" barStyle="light-content" />
+        }
         {isAddingNote ? (
-            <>
-                <View style={[styles.titleRow, styles.titleSection, { backgroundColor: noteBackgroundColor || '#262626' }]}>
-                  <Animated.View style={{ transform: [{ scale: scale }] }}>
-                      <TouchableComponent
-                        onPress={async () => {
-                          animateButton();
-                          console.log('Back arrow pressed');
-                          await handleExit();
-                        }}
-                        background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
-                      >
-                        <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
-                          <MaterialCommunityIcons name="arrow-left" size={23} color="#9d9292" />
-                        </View>
-                      </TouchableComponent>
-                    </Animated.View>
-
-                    <View style={{ flexDirection: 'row', flex: 1, alignItems: 'center' }}>
-                        <TouchableOpacity activeOpacity={1} style={{ flex: 1 }}>
-                            <TextInput
-                                style={[styles.input, styles.titleInput]}
-                                placeholder="Title"
-                                placeholderTextColor="#777"
-                                value={title}
-                                onChangeText={handleTitleChange}
-                                selectionColor="#4c2a5b"
-                            />
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity 
-                            onPress={async () => {
-                                await saveNote();
-                                setHasChanged(false);
-                            }} 
-                            style={[styles.checkButton, { marginRight: -20 }]}
-                        >
-                            <MaterialCommunityIcons 
-                                name="check" 
-                                size={24} 
-                                color={checkIconColor} 
-                            />
-                        </TouchableOpacity>
-                        {/* opening Options menu for OptionsMenu.js */}
-                        <TouchableComponent
-                                  onPress={async () => {
-                                    contentInputRef.current?.blurContentEditor();
-                                    setNoteToDeleteId(editingNoteIdRef.current);
-                                    setOptionsDialogVisible(true);
-                                    Keyboard.dismiss();
-                                  }}
-                                  background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
-                              >
-                                  <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
-                                      <MaterialCommunityIcons name="dots-vertical" size={24} color="#777" />
-                                  </View>
-                              </TouchableComponent>
-
-                    </View>
-                </View>
-        
-                <>
-                <ScrollView 
-                  ref={scrollViewRef}
-                  onContentSizeChange={() => {
-                    if (isNearEnd) {
-                      scrollViewRef.current.scrollToEnd({ animated: true });
-                    }
+          <>
+            <View style={[styles.titleRow, styles.titleSection, { backgroundColor: noteBackgroundColor || '#262626' }]}>
+              <Animated.View style={{ transform: [{ scale: scale }] }}>
+                <TouchableComponent
+                  onPress={async () => {
+                    animateButton();
+                    await handleExit();
                   }}
-                  onScroll={({ nativeEvent }) => {
-                    const padding = 50; 
-                    const isNearBottom = nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >= nativeEvent.contentSize.height - padding;
-                    setIsNearEnd(isNearBottom);
-                  }}
-                  scrollEventThrottle={400}
-                  style={{ flex: 1, backgroundColor: noteBackgroundColor || '#262626' }}
+                  background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
                 >
-                  <RichEditor
-                    key={`${fontSize}-{forceUpdate ? 'forceUpdate1' : 'forceUpdate2'}`}
-                    ref={contentInputRef}
-                    customCSS={`body { font-size: 28px; }`}
-                    style={styles.contentInput}
-                    androidHardwareAccelerationDisabled={true}
-                    initialContentHTML={content}
-                    placeholder={"Start writing..."}
-                    editorStyle={{
-                      contentCSSText: `font-size: ${fontSize}px;`,
-                      backgroundColor: noteBackgroundColor || '#262626',
-                      color: fontContrast.color,
-                      placeholderColor: '#757578',
-                      caretColor: '#9d9fd2',
-                    }}
-                    onChange={handleContentChange}
-                    onKeyDown={() => {
-                      setCheckIconColor('white');
-                    }}
-                    onFocus={() => {
-                      setCheckIconColor('white');
-                    }}
-                    onLink={(url) => {
-                      Linking.canOpenURL(url).then((supported) => {
-                        if (supported) {
-                          Linking.openURL(url);
-                        } else {
-                          console.log(`Don't know how to open URL: ${url}`);
-                        }
-                      });
-                    }}
+                  <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
+                    <MaterialCommunityIcons name="arrow-left" size={23} color="#9d9292" />
+                  </View>
+                </TouchableComponent>
+              </Animated.View>
+              <View style={{ flexDirection: 'row', flex: 1, alignItems: 'center' }}>
+                <TouchableOpacity activeOpacity={1} style={{ flex: 1 }}>
+                  <TextInput
+                    style={[styles.input, styles.titleInput]}
+                    placeholder="Title"
+                    placeholderTextColor="#777"
+                    value={title}
+                    onChangeText={handleTitleChange}
+                    selectionColor="#4c2a5b"
                   />
-                </ScrollView>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={async () => {
+                    await saveNote();
+                    setHasChanged(false);
+                  }} 
+                  style={[styles.checkButton, { marginRight: -20 }]}
+                >
+                  <MaterialCommunityIcons 
+                    name="check" 
+                    size={24} 
+                    color={checkIconColor} 
+                  />
+                </TouchableOpacity>
+                {/* opening Options menu for OptionsMenu.js */}
+                <TouchableComponent
+                  onPress={async () => {
+                    contentInputRef.current?.blurContentEditor();
+                    setNoteToDeleteId(editingNoteIdRef.current);
+                    setOptionsDialogVisible(true);
+                    Keyboard.dismiss();
+                  }}
+                  background={Platform.OS === 'android' ? TouchableNativeFeedback.Ripple('#1e1e2d', true) : undefined}
+                >
+                  <View style={{ padding: 10, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
+                    <MaterialCommunityIcons name="dots-vertical" size={24} color="#777" />
+                  </View>
+                </TouchableComponent>
+              </View>
+            </View>
+            <>
+              <ScrollView 
+                ref={scrollViewRef}
+                onContentSizeChange={() => {
+                  if (isNearEnd) {
+                    scrollViewRef.current.scrollToEnd({ animated: true });
+                  }
+                }}
+                onScroll={({ nativeEvent }) => {
+                  const padding = 50; 
+                  const isNearBottom = nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >= nativeEvent.contentSize.height - padding;
+                  setIsNearEnd(isNearBottom);
+                }}
+                scrollEventThrottle={400}
+                style={{ flex: 1, backgroundColor: noteBackgroundColor || '#262626' }}
+              >
+                <RichEditor
+                  key={`${fontSize}-{forceUpdate ? 'forceUpdate1' : 'forceUpdate2'}`}
+                  ref={contentInputRef}
+                  customCSS={`body { font-size: 28px; }`}
+                  style={styles.contentInput}
+                  androidHardwareAccelerationDisabled={true}
+                  initialContentHTML={content}
+                  placeholder={"Start writing..."}
+                  editorStyle={{
+                    contentCSSText: `font-size: ${fontSize}px;`,
+                    backgroundColor: noteBackgroundColor || '#262626',
+                    color: fontContrast.color,
+                    placeholderColor: '#757578',
+                    caretColor: '#9d9fd2',
+                  }}
+                  onChange={handleContentChange}
+                  onKeyDown={() => {
+                    setCheckIconColor('white');
+                  }}
+                  onFocus={() => {
+                    setCheckIconColor('white');
+                  }}
+                  onLink={(url) => {
+                    Linking.canOpenURL(url).then((supported) => {
+                      if (supported) {
+                        Linking.openURL(url);
+                      } else {
+                        console.log(`Don't know how to open URL: ${url}`);
+                      }
+                    });
+                  }}
+                />
+              </ScrollView>
               {isKeyboardVisible && (
                 <RichToolbar 
                   editor={contentInputRef}
@@ -695,119 +670,116 @@ export default function App() {
                   }}                  
                 />
               )}
-              </>
-              
-
             </>
+          </>
         ) : (
-            <>  
-                    {isBulkDeleteMode ? (
-                                   <DeleteButtons
-                                   handleBulkDelete={() => handleBulkDelete(selectedNotes, setNotes, setIsBulkDeleteMode, setSelectedNotes, notes)}
-                                   exitBulkDeleteMode={() => exitBulkDeleteMode(setIsBulkDeleteMode, setSelectedNotes)}
-                                   selectedNotes={selectedNotes}
-                               />
-                           ) : (
-                <Button 
-                    icon="plus" 
-                    mode="contained" 
-                    style={styles.addNoteButton} 
-                    onPress={() => {
-                        setIsAddingNote(true);
-                        setTitle('');
-                        setContent('');
-                        editingNoteIdRef.current = null;
-                        setIsSaved(false);
-                        tempCreatedDateRef.current = new Date().toISOString();
-                    }}
-                >
-                    Add Note
-                </Button>
-                )}
-                    {isAtBottom && (
-                        <View style={styles.scrollIndicator}>
-                          <IconButton icon="arrow-down" size={20} color="#777" />
-                        </View>
-                      )}
-                      
-                    {
-                        hasLoadedNotes && notes.length === 0 ? (
-                          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'flex-end' }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <Text style={{ marginRight: 20, fontSize: 18, color: '#777' }}>No notes available</Text>
-                              <Image 
-                                source={require('./teememo.png')}
-                                style={{ width: 200, height: 200 }}
-                              />
-                            </View>
-                          </View>
-                        ) : (
-                     
-                          <FlatList
-                            removeClippedSubviews={true}
-                            data={notes}
-                            initialNumToRender={10}
-                            maxToRenderPerBatch={10}
-                            windowSize={21}
-                            keyExtractor={note => note.id}
-                            onScroll={({ nativeEvent }) => {
-                              const isAtEnd = nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >= nativeEvent.contentSize.height;
-                              setIsAtBottom(!isAtEnd);
-                            }}
-                            scrollEventThrottle={16}
-                            renderItem={({ item: note, index }) => (
-                              <MemoizedListItem 
-                                note={note} 
-                                index={index}
-                                setPressedIndex={setPressedIndex}
-                                pressedIndex={pressedIndex}
-                                setIsAddingNote={setIsAddingNote}
-                                setTitle={setTitle}
-                                setContent={setContent}
-                                setIsSaved={setIsSaved}
-                                editingNoteIdRef={editingNoteIdRef}
-                                contentInputRef={contentInputRef}
-                                styles={styles}
-                                getEmojiForNote={getEmojiForNote}
-                                getEmojiSizeForTitle={getEmojiSizeForTitle}
-                                getColorByIndex={getColorByIndex}
-                              />
-                            )}
-                          />     
-                      )
-                    }    
-                              </>
-                          )}
-
-                {isColorPickerVisible && (
-                  <View style={{position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 999}}>
-                    <View style={{flex: 1}}>
-                      <ColorPicker ref={colorPickerRef} color={currentColor} onColorChange={handleColorPickerChange} thumbSize={40} sliderSize={40} noSnap={true} row={false} swatchesLast={false} />
-                      <View style={{position: 'absolute', bottom: 34, right: 1}}>
-                        <View>
-                          {/* Existing Close Button */}
-                          <TouchableOpacity onPress={() => {setColorPickerVisible(false);}} style={{backgroundColor: DefaultTheme.colors.surface, height: 30, width: 90, justifyContent: 'center', alignItems: 'center', borderRadius: 15, marginLeft: 7}}>
-                            <Text style={{color: DefaultTheme.colors.primary, fontSize: 12}}>Close</Text>
-                          </TouchableOpacity>
-                          <View style={{flexDirection: 'row', position: 'absolute', bottom: 31, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.3)'}}>
-                            <Text style={{fontSize: 11, color: 'white', fontWeight: 'bold'}}>Close Picker</Text>
-                          </View>
-                          {/* New Reset Color Button */}
-                          <TouchableOpacity onPress={() => {setCurrentColor(fontContrast.color);}} style={{backgroundColor: DefaultTheme.colors.surface, height: 30, width: 100, justifyContent: 'center', alignItems: 'center', borderRadius: 15, marginTop: 13}}>
-                            <Text style={{color: DefaultTheme.colors.primary, fontSize: 12}}>Reset Color</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </View>
+          <>  
+            {isBulkDeleteMode ? (
+              <DeleteButtons
+                handleBulkDelete={() => handleBulkDelete(selectedNotes, setNotes, setIsBulkDeleteMode, setSelectedNotes, notes)}
+                exitBulkDeleteMode={() => exitBulkDeleteMode(setIsBulkDeleteMode, setSelectedNotes)}
+                selectedNotes={selectedNotes}
+              />
+            ) : (
+              <Button 
+                icon="plus" 
+                mode="contained" 
+                style={styles.addNoteButton} 
+                onPress={() => {
+                  setIsAddingNote(true);
+                  setTitle('');
+                  setContent('');
+                  editingNoteIdRef.current = null;
+                  setIsSaved(false);
+                  tempCreatedDateRef.current = new Date().toISOString();
+                }}
+              >
+                Add Note
+              </Button>
+            )}
+            {isAtBottom && (
+              <View style={styles.scrollIndicator}>
+                <IconButton icon="arrow-down" size={20} color="#777" />
+              </View>
+            )}
+            {
+              hasLoadedNotes && notes.length === 0 ? (
+                <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'flex-end' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ marginRight: 20, fontSize: 18, color: '#777' }}>No notes available</Text>
+                    <Image 
+                      source={require('./teememo.png')}
+                      style={{ width: 200, height: 200 }}
+                    />
                   </View>
-                )}
-
-              <Portal>
-                <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
-              </Portal>
-    </View>
+                </View>
+              ) : (
+                <FlatList
+                  removeClippedSubviews={true}
+                  data={notes}
+                  initialNumToRender={10}
+                  maxToRenderPerBatch={10}
+                  windowSize={21}
+                  keyExtractor={note => note.id}
+                  onScroll={({ nativeEvent }) => {
+                    const isAtEnd = nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >= nativeEvent.contentSize.height;
+                    setIsAtBottom(!isAtEnd);
+                  }}
+                  scrollEventThrottle={16}
+                  renderItem={({ item: note, index }) => (
+                    <MemoizedListItem 
+                      note={note} 
+                      index={index}
+                      setPressedIndex={setPressedIndex}
+                      pressedIndex={pressedIndex}
+                      setIsAddingNote={setIsAddingNote}
+                      setTitle={setTitle}
+                      setContent={setContent}
+                      setIsSaved={setIsSaved}
+                      editingNoteIdRef={editingNoteIdRef}
+                      contentInputRef={contentInputRef}
+                      styles={styles}
+                      getEmojiForNote={getEmojiForNote}
+                      getEmojiSizeForTitle={getEmojiSizeForTitle}
+                      getColorByIndex={getColorByIndex}
+                    />
+                  )}
+                />     
+              )
+            }    
+          </>
+        )}
+  
+        {isColorPickerVisible && (
+          <View style={{position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 999}}>
+            <View style={{flex: 1}}>
+              <ColorPicker ref={colorPickerRef} color={currentColor} onColorChange={handleColorPickerChange} thumbSize={40} sliderSize={40} noSnap={true} row={false} swatchesLast={false} />
+              <View style={{position: 'absolute', bottom: 34, right: 1}}>
+                <View>
+                  {/* Existing Close Button */}
+                  <TouchableOpacity onPress={() => {setColorPickerVisible(false);}} style={{backgroundColor: DefaultTheme.colors.surface, height: 30, width: 90, justifyContent: 'center', alignItems: 'center', borderRadius: 15, marginLeft: 7}}>
+                    <Text style={{color: DefaultTheme.colors.primary, fontSize: 12}}>Close</Text>
+                  </TouchableOpacity>
+                  <View style={{flexDirection: 'row', position: 'absolute', bottom: 31, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.3)'}}>
+                    <Text style={{fontSize: 11, color: 'white', fontWeight: 'bold'}}>Close Picker</Text>
+                  </View>
+                  {/* New Reset Color Button */}
+                  <TouchableOpacity onPress={() => {setCurrentColor(fontContrast.color);}} style={{backgroundColor: DefaultTheme.colors.surface, height: 30, width: 100, justifyContent: 'center', alignItems: 'center', borderRadius: 15, marginTop: 13}}>
+                    <Text style={{color: DefaultTheme.colors.primary, fontSize: 12}}>Reset Color</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+  
+        <Portal>
+          <OptionsMenu editingNoteIdRef={editingNoteIdRef} setContent={setContent} setTitle={setTitle} setIsAddingNote={setIsAddingNote} noteBackgroundColor={noteBackgroundColor} isDeleteDialogVisible={isDeleteDialogVisible} setDeleteDialogVisible={setDeleteDialogVisible} deleteNote={deleteNote} isOptionsDialogVisible={isOptionsDialogVisible} setOptionsDialogVisible={setOptionsDialogVisible} setSoftBlackBackground={setSoftBlackBackground} setPureDarkBackground={setPureDarkBackground} setEvernoteStyle={setEvernoteStyle} visible={visible} setVisible={setVisible} fontSize={fontSize} setFontSize={setFontSize} visibleContrast={visibleContrast} setVisibleContrast={setVisibleContrast} fontContrast={fontContrast} setFontContrast={setFontContrast} emojis={emojis} notes={notes} noteToDeleteId={noteToDeleteId} setNotes={setNotes} />
+        </Portal>
+      </View>
     </Provider>
   );
+
 }
 
 const styles = StyleSheet.create({
