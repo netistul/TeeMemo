@@ -15,4 +15,6 @@ The goal was to create an app for taking notes as quickly and simply as possible
 - Bold/Italic/Strikethrough/Underline text
 - Very clean interface
 
-[![Download from Google Play](https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png)](https://play.google.com)
+<a href="https://play.google.com">
+    <img src="https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png" width="270">
+</a>
