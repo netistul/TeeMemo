@@ -274,7 +274,6 @@ export default function OptionsMenu(props) {
                 )}>Delete</Button>
             </Dialog.Actions>
         </Dialog>
-        
         <Dialog visible={isOptionsDialogVisible} onDismiss={() => setOptionsDialogVisible(false)} style={{ backgroundColor: '#333' }}> 
                                         <TouchableOpacity 
                                         onPress={async () => {
