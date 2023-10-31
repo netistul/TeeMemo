@@ -5,10 +5,10 @@ The goal was to create an app for taking notes as quickly as possible, with all 
 - Offline notes
 - Write in any color
 - Bulk note deletion
-- Adjustable font size
 - Very clean interface
-- Undo and redo options
+- Adjustable font size
 - Color themes for notes
+- Undo and redo options
 - Changeable font contrast
 - Set a note to display at startup
 - Personalize each note with a custom emoji 🦉
