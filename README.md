@@ -4,14 +4,15 @@ The goal was to create an app for taking notes as quickly as possible, with all 
 ## Features
 - Clean interface
 - Write in any color
-- Bulk note deletion
+- Add images to notes
 - Adjustable font size
+- Customizable font contrast
 - Color themes for notes
 - Undo and redo options
-- Changeable font contrast
+- Rich text editing (bold, italics, etc.)
+- Bulk note deletion
 - Set a note to display at startup
 - Personalize each note with a custom emoji 🦉
-- Includes features like bold, italics or adding images
 - Backup & restore notes directly to your cloud account (e.g., Google Drive)
 
 <a href="https://play.google.com">
