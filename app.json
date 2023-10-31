@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#8cd390"
+        "backgroundColor": "#44304e"
       },
       "package": "com.netistul.teememo"
     },

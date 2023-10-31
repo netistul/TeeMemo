@@ -1,4 +1,4 @@
-import { DefaultTheme, Button, Menu, Dialog, Portal} from 'react-native-paper';
+import { DefaultTheme, Button, Menu, Dialog, Portal, Snackbar} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState, useEffect, useRef } from 'react';
@@ -20,6 +20,25 @@ export default function OptionsMenu(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedEmoji, setSelectedEmoji] = useState(null);
     const emojiOpacity = useRef(new Animated.Value(1)).current;
+    const [snackbarVisible, setSnackbarVisible] = useState(false);
+    const [isStartupNote, setIsStartupNote] = useState(false);
+    const [checkCompleted, setCheckCompleted] = useState(false);
+
+    useEffect(() => {
+        const checkStartupNote = async () => {
+          const storedStartupNoteId = await AsyncStorage.getItem('startupNoteId');
+          if (storedStartupNoteId === noteToDeleteId) {
+            setIsStartupNote(true);
+          } else {
+            setIsStartupNote(false);
+          }
+          setCheckCompleted(true);
+        };
+      
+        setCheckCompleted(false);  // Reset the check status when note id changes
+        checkStartupNote();
+      }, [noteToDeleteId]);
+
 
     const createBackup = async () => {
         try {
@@ -200,6 +219,14 @@ export default function OptionsMenu(props) {
         );
     }
 
+    // This function will show the modal and auto-hide it after 5 seconds
+    const showAndHideModal = () => {
+        setSnackbarVisible(true);
+        setTimeout(() => {
+        setSnackbarVisible(false);
+        }, 3000);
+    };
+
     return (
         <>
            {selectedEmoji && (
@@ -226,7 +253,7 @@ export default function OptionsMenu(props) {
                 )}
             </Animated.View>
         )}
-    <Dialog visible={isDeleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)} style={{ backgroundColor: '#333' }}>
+    <Dialog visible={isDeleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)} style={{ backgroundColor: '#44304e' }}>
         <View style={{ padding: 20 }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>Confirm Delete</Text>
         </View>
@@ -247,7 +274,36 @@ export default function OptionsMenu(props) {
                 )}>Delete</Button>
             </Dialog.Actions>
         </Dialog>
-        <Dialog visible={isOptionsDialogVisible} onDismiss={() => setOptionsDialogVisible(false)} style={{ backgroundColor: '#333' }}>                                      
+        <Dialog visible={isOptionsDialogVisible} onDismiss={() => setOptionsDialogVisible(false)} style={{ backgroundColor: '#333' }}> 
+                                        <TouchableOpacity 
+                                        onPress={async () => {
+                                            if (isStartupNote) {
+                                            await AsyncStorage.removeItem('startupNoteId');
+                                            } else {
+                                            await AsyncStorage.setItem('startupNoteId', noteToDeleteId);
+                                            }
+                                            setIsStartupNote(!isStartupNote);
+                                            setOptionsDialogVisible(false);
+                                            showAndHideModal();
+                                        }}
+                                        style={{ 
+                                            flexDirection: 'row', 
+                                            alignItems: 'center', 
+                                            marginTop: 5,
+                                            justifyContent: 'center'
+                                        }}
+                                        >
+                                        <MaterialCommunityIcons 
+                                            name="star-outline" 
+                                            size={21} 
+                                            color="#262626" 
+                                        />
+                                        <Text style={{ color: isStartupNote ? '#FFD700' : '#bab64d', marginLeft: 5, fontSize: 14 }}>
+                                            {checkCompleted ? (isStartupNote ? "Remove from Startup Notes" : "Set as Startup Note") : "Set as Startup Note"}
+                                        </Text>
+                                        </TouchableOpacity>
+
+                                    
         <View style={{ padding: 20 }}>
                                 <Text style={{ fontSize: 15, fontWeight: 'bold', color: 'white' }}>Options</Text>
                                 
@@ -616,6 +672,26 @@ export default function OptionsMenu(props) {
             <Button onPress={() => setOptionsDialogVisible(false)}>Close</Button>
         </Dialog.Actions>
     </Dialog>
+                                  {/* Alert dialog after setting a note at startup */}
+                                  <Modal
+                                    animationType="slide"
+                                    transparent={true}
+                                    visible={snackbarVisible}
+                                    onRequestClose={() => setSnackbarVisible(false)}
+                                    >
+                                    <TouchableWithoutFeedback onPress={() => setSnackbarVisible(false)}>
+                                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                        <TouchableWithoutFeedback>
+                                            <View style={{ backgroundColor: '#8850a4', padding: 20, borderRadius: 10 }}>
+                                            <Text style={{ color: 'white', fontSize: 18 }}>
+                                                {'Startup Note Updated \u{1F989}'}
+                                            </Text>
+                                            </View>
+                                        </TouchableWithoutFeedback>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+                                    </Modal>
+
     </>
  );
 }

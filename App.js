@@ -500,15 +500,38 @@ export default function App() {
   const loadNotes = async () => {
     try {
       const savedNotes = await AsyncStorage.getItem('notes');
+      const startupNoteId = await AsyncStorage.getItem('startupNoteId');
+
       if (savedNotes !== null) {
-        setNotes(JSON.parse(savedNotes));
+        const parsedNotes = JSON.parse(savedNotes);
+        setNotes(parsedNotes);
+
+        // Navigate to the note if a startupNoteId exists AND notes have not yet loaded
+        if (startupNoteId !== null && !hasLoadedNotes) {
+          const startupNote = parsedNotes.find(note => note.id === startupNoteId);
+          if (startupNote) {
+            navigateToNote(startupNote);
+          }
+        }
       }
-      
     } catch (error) {
       console.log("Error loading notes:", error);
     }
     setHasLoadedNotes(true);
   };
+
+  const navigateToNote = (note) => {
+    requestAnimationFrame(() => {
+      if (contentInputRef.current) {
+        contentInputRef.current.setContentHTML(note.content);
+      }
+      setIsAddingNote(true);
+      setTitle(note.title);
+      setContent(note.content);
+      editingNoteIdRef.current = note.id;
+      setIsSaved(false);
+    });
+  };  
 
 
   return (
