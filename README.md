@@ -11,7 +11,7 @@ The goal was to create an app for taking notes as quickly as possible, with all 
 - Changeable font contrast
 - Set a note to display at startup
 - Personalize each note with a custom emoji 🦉
-- Includes features like bold, italics, adding images, and more
+- Includes features like bold, italics or adding images
 - Backup & restore notes directly to your cloud account (e.g., Google Drive)
 
 <a href="https://play.google.com">
