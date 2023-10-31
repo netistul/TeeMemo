@@ -2,10 +2,9 @@
 TeeMemo was born out of the need for a clean, offline, fast, yet feature-rich notes app.  
 The goal was to create an app for taking notes as quickly as possible, with all notes being entirely offline.
 ## Features
-- Offline notes
+- Clean interface
 - Write in any color
 - Bulk note deletion
-- Very clean interface
 - Adjustable font size
 - Color themes for notes
 - Undo and redo options
