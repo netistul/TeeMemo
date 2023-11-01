@@ -68,14 +68,12 @@ export const handleBulkDelete = async (
 
 export const toggleSelectNote = (noteId, setSelectedNotes) => {
   setSelectedNotes((prevSelected) => {
-    console.log("Previous selected notes: ", Array.from(prevSelected));
     const newSelected = new Set([...prevSelected]);
     if (newSelected.has(noteId)) {
       newSelected.delete(noteId);
     } else {
       newSelected.add(noteId);
     }
-    console.log("Newly selected notes: ", Array.from(newSelected));
     return newSelected;
   });
 };
@@ -102,7 +100,6 @@ export const DeleteButtons = ({
 );
 
 export const CustomCheckBox = ({ isSelected, onChange }) => {
-  console.log("Is selected:", isSelected);
   return (
     <TouchableOpacity onPress={onChange} style={{ padding: 10 }}>
       <View
