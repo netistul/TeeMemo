@@ -24,6 +24,7 @@ import {
   Image,
   Animated,
   Linking,
+  KeyboardAvoidingView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -684,6 +685,7 @@ export default function App() {
                   </View>
                 </TouchableComponent>
               </Animated.View>
+              
               <View
                 style={{ flexDirection: "row", flex: 1, alignItems: "center" }}
               >
@@ -741,9 +743,11 @@ export default function App() {
                 </TouchableComponent>
               </View>
             </View>
+            
             <>
               <ScrollView
                 ref={scrollViewRef}
+                contentContainerStyle={{ flexGrow: 1 }}
                 onContentSizeChange={() => {
                   if (isNearEnd) {
                     scrollViewRef.current.scrollToEnd({ animated: true });
@@ -767,7 +771,7 @@ export default function App() {
                   key={`${fontSize}-{forceUpdate ? 'forceUpdate1' : 'forceUpdate2'}`}
                   ref={contentInputRef}
                   customCSS={`body { font-size: 28px; }`}
-                  style={styles.contentInput}
+                  style={{ ...styles.contentInput, flex: 1 }}
                   androidHardwareAccelerationDisabled={true}
                   initialContentHTML={content}
                   placeholder={"Start writing..."}
@@ -795,7 +799,9 @@ export default function App() {
                     });
                   }}
                 />
+                
               </ScrollView>
+              
               {isKeyboardVisible && (
                 <RichToolbar
                   editor={contentInputRef}
