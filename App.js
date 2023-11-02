@@ -192,7 +192,7 @@ export default function App() {
           setIsSaving(false);
         });
     }
-  }, 1500);
+  }, 1000);
 
   const handleTitleChange = (text) => {
     setTitle(text);
@@ -307,6 +307,7 @@ export default function App() {
       let base64URI = `data:image/jpg;base64,${result.assets[0].base64}`;
       contentInputRef.current?.insertImage(base64URI);
 
+      setCheckIconColor("white");
       setForceUpdate(!forceUpdate);
 
       setTimeout(async () => {
@@ -319,6 +320,7 @@ export default function App() {
   const handleColorPickerChange = (color) => {
     setCurrentColor(color);
     contentInputRef.current?.setForeColor(color);
+    setCheckIconColor("white");
   };
 
   useEffect(() => {
