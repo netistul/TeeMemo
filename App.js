@@ -118,7 +118,7 @@ export default function App() {
         style={styles.editor}
         initialHtml={editorHtml}
         onHtmlChange={handleHtmlChange}
-        theme={{ background: '#343541', color: '#ffffff', placeholder: '#555555' }}
+        theme={{ background: '#626262', color: '#ffffff', placeholder: '#555555' }}
       />
       <QuillToolbar
         key={toolbarKey}
