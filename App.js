@@ -236,7 +236,7 @@ export default function App() {
     setTitle("");
     setContent("");
     setEditMode(false);
-    setCheckIconColor("#777"); // Reset the check icon color to grey
+    setCheckIconColor("#777");
     scale.setValue(1);
   };
 
@@ -687,7 +687,7 @@ export default function App() {
                   </View>
                 </TouchableComponent>
               </Animated.View>
-              
+
               <View
                 style={{ flexDirection: "row", flex: 1, alignItems: "center" }}
               >
@@ -745,24 +745,11 @@ export default function App() {
                 </TouchableComponent>
               </View>
             </View>
-            
+
             <>
               <ScrollView
                 ref={scrollViewRef}
-                contentContainerStyle={{ flexGrow: 1 }}
-                onContentSizeChange={() => {
-                  if (isNearEnd) {
-                    scrollViewRef.current.scrollToEnd({ animated: true });
-                  }
-                }}
-                onScroll={({ nativeEvent }) => {
-                  const padding = 50;
-                  const isNearBottom =
-                    nativeEvent.layoutMeasurement.height +
-                      nativeEvent.contentOffset.y >=
-                    nativeEvent.contentSize.height - padding;
-                  setIsNearEnd(isNearBottom);
-                }}
+                // Removed onContentSizeChange prop
                 scrollEventThrottle={400}
                 style={{
                   flex: 1,
@@ -801,9 +788,8 @@ export default function App() {
                     });
                   }}
                 />
-                
               </ScrollView>
-              
+
               {isKeyboardVisible && (
                 <RichToolbar
                   editor={contentInputRef}
