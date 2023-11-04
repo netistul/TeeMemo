@@ -21,7 +21,7 @@ The goal was to create an app for taking notes as quickly as possible, with all 
 </a>
 
 <a href="https://play.google.com">
-    <img src="[https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png](https://github.com/netistul/TeeMemo/assets/92587825/69207a6c-5ebd-44a4-9729-76dd3d62bb01)" width="270">
+    <img src="[[https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png](https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498168-0e65bebf-230b-461e-9d7a-71831087b130.jpg)]([https://github.com/netistul/TeeMemo/assets/92587825/69207a6c-5ebd-44a4-9729-76dd3d62bb01](https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498168-0e65bebf-230b-461e-9d7a-71831087b130.jpg))" width="270">
 </a>
 
 ## Roadmap
