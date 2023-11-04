@@ -20,9 +20,14 @@ The goal was to create an app for taking notes as quickly as possible, with all 
     <img src="https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png" width="270">
 </a>
 
-<a href="https://play.google.com">
-    <img src="[[https://user-images.githubusercontent.com/92587825/277521178-29b7e0ef-f81b-4353-be42-5c65f7d4cfbe.png](https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498168-0e65bebf-230b-461e-9d7a-71831087b130.jpg)]([https://github.com/netistul/TeeMemo/assets/92587825/69207a6c-5ebd-44a4-9729-76dd3d62bb01](https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498168-0e65bebf-230b-461e-9d7a-71831087b130.jpg))" width="270">
-</a>
+
+<p align="center">
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498168-0e65bebf-230b-461e-9d7a-71831087b130.jpg" width="300" />
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498205-7d7db21d-4b2d-415c-86c1-2f1c1eb9214a.jpg" width="300" /> 
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498217-fa76f08a-62de-40a0-bf62-a4c1d34f2582.jpg" width="300" />
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498224-d6c3b61e-c964-46bd-84f6-02adb06ed0c1.jpg" width="300" />
+</p>
+
 
 ## Roadmap
 - [ ] Lock notes with password
