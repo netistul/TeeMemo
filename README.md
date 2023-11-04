@@ -21,11 +21,11 @@ The goal was to create an app for taking notes as quickly as possible, with all 
 </a>
 
 
-<p align="center">
-  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498168-0e65bebf-230b-461e-9d7a-71831087b130.jpg" width="200" />
-  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498205-7d7db21d-4b2d-415c-86c1-2f1c1eb9214a.jpg" width="200" /> 
-  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498217-fa76f08a-62de-40a0-bf62-a4c1d34f2582.jpg" width="200" />
-  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498224-d6c3b61e-c964-46bd-84f6-02adb06ed0c1.jpg" width="200" />
+<p align="center" style="margin: 0; padding: 0;">
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498168-0e65bebf-230b-461e-9d7a-71831087b130.jpg" style="max-width: 300px; display: inline-block; margin: 0; padding: 0;" />
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498205-7d7db21d-4b2d-415c-86c1-2f1c1eb9214a.jpg" style="max-width: 300px; display: inline-block; margin: 0; padding: 0;" />
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498217-fa76f08a-62de-40a0-bf62-a4c1d34f2582.jpg" style="max-width: 300px; display: inline-block; margin: 0; padding: 0;" />
+  <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/92587825/280498224-d6c3b61e-c964-46bd-84f6-02adb06ed0c1.jpg" style="max-width: 300px; display: inline-block; margin: 0; padding: 0;" />
 </p>
 
 
