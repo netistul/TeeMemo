@@ -30,7 +30,7 @@ The goal was to create an app for taking notes as quickly as possible, with all 
 ## Roadmap
 - [ ] Lock notes with password
 - [ ] Version history of the note
-- [ ] Built-in checkbox feature, with improved visual design.
+- [ ] Built-in checkbox feature
 - [ ] Custom fonts
 - [ ] Tagging system for notes and notebook categorization
 - [ ] Customizable card notes colors
