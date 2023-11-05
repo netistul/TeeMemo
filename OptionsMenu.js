@@ -20,7 +20,34 @@ import EmojiPicker, { emojiFromUtf16 } from "rn-emoji-picker";
 import { emojis as emojiData } from "rn-emoji-picker/dist/data";
 
 export default function OptionsMenu(props) {
-  const { editingNoteIdRef, setContent, setTitle, setIsAddingNote, noteBackgroundColor, isDeleteDialogVisible, setDeleteDialogVisible, isOptionsDialogVisible, setOptionsDialogVisible, setSoftBlackBackground, setPureDarkBackground, setEvernoteStyle, visible, setVisible, fontSize, setFontSize, visibleContrast, setVisibleContrast, fontContrast, setFontContrast, emojis, notes, noteToDeleteId, setNotes, deleteNote } = props;
+  const {
+    handleFontSizeChange,
+    editingNoteIdRef,
+    setContent,
+    setTitle,
+    setIsAddingNote,
+    noteBackgroundColor,
+    isDeleteDialogVisible,
+    setDeleteDialogVisible,
+    isOptionsDialogVisible,
+    setOptionsDialogVisible,
+    setSoftBlackBackground,
+    setPureDarkBackground,
+    setEvernoteStyle,
+    visible,
+    setVisible,
+    fontSize,
+    setFontSize,
+    visibleContrast,
+    setVisibleContrast,
+    fontContrast,
+    setFontContrast,
+    emojis,
+    notes,
+    noteToDeleteId,
+    setNotes,
+    deleteNote,
+  } = props;
   const [showBackupInfo, setShowBackupInfo] = React.useState(false);
   const [showRestoreInfo, setShowRestoreInfo] = React.useState(false);
   const [recentEmojis, setRecentEmojis] = useState([]);
@@ -503,7 +530,7 @@ export default function OptionsMenu(props) {
                     titleStyle={{ color: "white", fontSize: 13 }}
                     onPress={() => {
                       setVisible(false);
-                      setFontSize(13);
+                      handleFontSizeChange(13);
                     }}
                     title="13"
                   />
@@ -512,7 +539,7 @@ export default function OptionsMenu(props) {
                     titleStyle={{ color: "white", fontSize: 14 }}
                     onPress={() => {
                       setVisible(false);
-                      setFontSize(14);
+                      handleFontSizeChange(14);
                     }}
                     title="14 (default)"
                   />
@@ -521,7 +548,7 @@ export default function OptionsMenu(props) {
                     titleStyle={{ color: "white", fontSize: 15 }}
                     onPress={() => {
                       setVisible(false);
-                      setFontSize(15);
+                      handleFontSizeChange(15);
                     }}
                     title="15"
                   />
@@ -530,7 +557,7 @@ export default function OptionsMenu(props) {
                     titleStyle={{ color: "white", fontSize: 16 }}
                     onPress={() => {
                       setVisible(false);
-                      setFontSize(16);
+                      handleFontSizeChange(16);
                     }}
                     title="16"
                   />
@@ -539,7 +566,7 @@ export default function OptionsMenu(props) {
                     titleStyle={{ color: "white", fontSize: 18 }}
                     onPress={() => {
                       setVisible(false);
-                      setFontSize(18);
+                      handleFontSizeChange(18);
                     }}
                     title="18"
                   />
@@ -548,7 +575,7 @@ export default function OptionsMenu(props) {
                     titleStyle={{ color: "white", fontSize: 20 }}
                     onPress={() => {
                       setVisible(false);
-                      setFontSize(20);
+                      handleFontSizeChange(20);
                     }}
                     title="20"
                   />

@@ -529,6 +529,19 @@ export default function App() {
     }
   };
 
+  const handleFontSizeChange = (newSize) => {
+    setFontSize(newSize);
+
+    AsyncStorage.setItem("fontSize", String(newSize));
+
+    // Reload the current note to apply the new font size
+    const currentNoteId = editingNoteIdRef.current;
+    const currentNote = notes.find((note) => note.id === currentNoteId);
+    if (currentNote) {
+      navigateToNote(currentNote);
+    }
+  };
+
   const loadFontContrast = async () => {
     try {
       const storedFontContrast = await AsyncStorage.getItem("fontContrast");
@@ -1073,6 +1086,7 @@ export default function App() {
 
         <Portal>
           <OptionsMenu
+            handleFontSizeChange={handleFontSizeChange}
             editingNoteIdRef={editingNoteIdRef}
             setContent={setContent}
             setTitle={setTitle}
