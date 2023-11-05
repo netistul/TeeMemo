@@ -22,7 +22,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#44304e"
       },
-      "package": "com.netistul.teememo"
+      "package": "com.netistul.teememo",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
