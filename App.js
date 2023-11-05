@@ -24,7 +24,7 @@ import {
   Image,
   Animated,
   Linking,
-  KeyboardAvoidingView,
+  AppState,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -249,7 +249,6 @@ export default function App() {
   };
 
   const animateButton = () => {
-    // Reset to default scale
     scale.setValue(1);
 
     // Animate
@@ -288,6 +287,25 @@ export default function App() {
   useEffect(() => {
     notesRef.current = notes;
   }, [notes]);
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      if (nextAppState === "background" && hasChangedRef.current) {
+        saveNote();
+      }
+    };
+
+    // Subscribe to app state changes and store the subscription object
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    // Cleanup subscription on component unmount
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -747,7 +765,7 @@ export default function App() {
             </View>
 
             <>
-            <ScrollView
+              <ScrollView
                 ref={scrollViewRef}
                 contentContainerStyle={{ flexGrow: 1 }}
                 onContentSizeChange={() => {
