@@ -23,7 +23,7 @@
         "backgroundColor": "#44304e"
       },
       "package": "com.netistul.teememo",
-      "versionCode": 2
+      "versionCode": 5
     },
     "web": {
       "favicon": "./assets/favicon.png"
