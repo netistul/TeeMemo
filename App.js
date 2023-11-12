@@ -488,14 +488,18 @@ export default function App() {
   const MemoizedListItem = React.memo(ListItem);
 
   const stripHtmlTags = (str) => {
-    if (str === null || str === "") {
-      return "";
-    } else {
-      str = str.toString();
-      return str.replace(/<[^>]*>/g, "");
-    }
+    if (str === null || str === "") return "";
+  
+    return str.toString()
+              .replace(/<\/li><li>/gi, ' ') // Add a space between closing </li> and opening <li>
+              .replace(/<\/?div>/gi, ' ') // Replace opening and closing <div> tags with spaces
+              .replace(/<br\s*\/?>/gi, ' ') // Replace <br> tags with spaces
+              .replace(/&nbsp;/gi, ' ') // Replace &nbsp; with space
+              .replace(/<[^>]*>/g, "") // Remove any remaining HTML tags
+              .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
+              .trim(); // Trim whitespace from start and end
   };
-
+  
   const handleLongPressNote = (noteId) => {
     setIsBulkDeleteMode(true);
     setSelectedNotes(new Set([...selectedNotes, noteId]));
